@@ -47,8 +47,10 @@ capacidade do dia = Σ (horas líquidas de cada turno da máquina, se o dia tive
 - **Produção dentro da escala (`fixedProd`):** a parte da produção real que cai dentro das janelas de turno.
 - **Utilização = produção dentro da escala ÷ capacidade fixa.**
 
-Produção fora do turno ou em hora extra é mostrada à parte e **não** aumenta a utilização. A utilização mede o uso
-da capacidade que a fábrica decidiu ter, não o esforço extra para compensá-la.
+Produção fora do turno ou em hora extra é mostrada à parte e **não** aumenta a utilização. A utilização usa
+minutos de relógio no numerador e capacidade líquida configurada no denominador. Valores acima de 100% podem
+ocorrer quando a produção nas janelas ultrapassa as horas líquidas configuradas. A produção alocada no destino
+da capacidade é uma métrica diferente, ponderada pela capacidade líquida e pela prioridade de cada destino.
 
 ## 5. Hora extra
 
@@ -71,8 +73,10 @@ máquina pareceria ter parado 30 minutos quando ficou parada dois dias. A regra:
 
 Paradas que se sobrepõem na mesma máquina são unidas em um único evento.
 
-**Indicadores:** disponibilidade = 1 − manutenção ÷ capacidade fixa; **MTTR** = parada real ÷ nº de eventos;
-**MTBF** = horas produzidas ÷ nº de eventos.
+**Indicadores:** disponibilidade = 1 − manutenção ÷ capacidade fixa; **parada média por evento** = parada
+real ÷ nº de eventos; **produção por evento** = horas produzidas ÷ nº de eventos. As médias incluem eventos
+inferidos e manutenções preventivas. O recorte pode começar ou terminar no meio de um evento. Para calcular
+MTTR e MTBF de confiabilidade, são necessários registros de falha e reparo com essa classificação.
 
 **Quadro de máquinas paradas.** A supervisão registra uma parada com início e, quando houver, a liberação. Uma
 parada aberta no quadro vira evento de manutenção até ser liberada, mesmo sem nenhum apontamento.
@@ -116,15 +120,20 @@ percentuais; horas, em %.
 
 Entram na carteira os pedidos (PV) com usinagem nos últimos 30 dias da base e os que o usuário cadastrou.
 
-- **Ritmo** = horas usinadas no PV nos últimos 14 dias ÷ 14. É o ritmo real, não o planejado.
-- **Término previsto**: o restante (`horas previstas − usinado`) é consumido no ritmo, só em dias úteis
-  (segunda a sexta, fora dos feriados). Como o ritmo é por dia corrido, cada dia útil consome `ritmo × 7 ÷ 5`.
-- **Situação**, nesta ordem: *concluído* (marcado ou usinado ≥ previsto) · *atrasado* (entrega já passou) ·
-  *sem ritmo* (nada usinado em 14 dias) · *em risco* (término previsto depois da entrega) · *no prazo*.
-  Sem horas ou sem entrega, o PV fica *sem previsão*.
-- **Carga semanal**: o restante de cada PV é distribuído por igual nos dias úteis até a entrega (PV atrasado cai
-  todo na primeira semana), repartido entre os grupos de máquinas na proporção das horas já usinadas. A capacidade
-  usa a escala validada; onde não há escala, a média do mesmo dia da semana nas últimas 4 semanas.
+- **Usinado:** união dos intervalos do mesmo PV na mesma máquina. Máquinas diferentes somam horas-máquina,
+  inclusive quando trabalham em paralelo. A soma por PV pode incluir sobreposições entre PVs distintos.
+- **Ritmo:** horas-máquina do PV na janela de 14 dias até o último registro, divididas por 14. Intervalos que
+  cruzam o início da janela são recortados.
+- **Término previsto:** o saldo (`horas previstas − usinado`) é consumido nos dias de trabalho do calendário
+  fabril a `ritmo × 7 ÷ 5` por dia. A projeção tem horizonte de 366 dias e não reserva máquina nem simula
+  a sequência das operações.
+- **Situação:** a conclusão exige confirmação. Ao atingir as horas previstas sem confirmação, o PV fica em
+  *validar saldo*. Com saldo em aberto, a entrega e a projeção determinam *atrasado*, *sem ritmo*, *em risco*
+  ou *no prazo*. Sem horas ou sem entrega, o PV com saldo indefinido fica *sem previsão*.
+- **Carga semanal:** distribui o saldo até a entrega nos dias de trabalho do calendário. Sem dia disponível
+  até a entrega, usa o primeiro dia de trabalho no horizonte exibido. A capacidade vem da escala operacional,
+  sem o corte do histórico. Para escala pendente, pode usar a média do dia da semana nas últimas quatro semanas.
+  A previsão só é comparável se as horas previstas também representarem horas-máquina.
 
 ## 11. Simulador
 

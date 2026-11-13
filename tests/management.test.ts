@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { dataQuality, operators, portfolio, simulate, weeklyLoad, type Scenario } from '../src/analytics/management';
-import type { CartEntry, Engine } from '../src/engine';
+import type { CartEntry, Engine, EngineConfig } from '../src/engine';
 import ref from './golden-management.json';
 import { loadTestEngine } from './helpers';
 
@@ -9,27 +9,57 @@ let engine: Engine;
 beforeAll(async () => { engine = (await loadTestEngine()).engine; });
 
 describe('carteira e prazos', () => {
-  it('status, término previsto e grupos de cada PV iguais à v2.2', () => {
-    const rows = portfolio(engine, ref.pv.cart as Record<string, CartEntry>);
-    expect(rows.map((r) => r.ped)).toEqual(ref.pv.rows.map((r) => r.ped));
-    rows.forEach((r, i) => {
-      const x = ref.pv.rows[i];
-      expect([r.machined, r.recent, r.planned, r.done, r.remaining, r.finish, r.status, r.due, r.manual, r.orders]).toEqual([x.min, x.r14, x.plan, x.done, x.rem, x.fin, x.st, x.due, x.manual, x.ops]);
-      expect(r.pace).toBeCloseTo(x.pace, 9);
-      r.groups.forEach(([g, f], j) => { expect(g).toBe(x.gs[j][0]); expect(f).toBeCloseTo(x.gs[j][1] as number, 9); });
-    });
+  const full = (e: Engine) => e.agg({ from: e.util.s2iso(e.dataset.minPd), to: e.util.s2iso(e.dataset.maxPd) });
+
+  it('consolida intervalos por PV e recurso, preserva máquinas paralelas e recorta os últimos 14 dias', () => {
+    const first = engine.dataset.prod[0];
+    const other = Object.keys(engine.dataset.machines).find((rc) => rc !== first.rc)!;
+    const cutoff = engine.dataset.lastT - 14 * 1440;
+    const prod = [
+      { ...first, ped: 100, t0: cutoff - 30, min: 60 },
+      { ...first, ped: 100, t0: cutoff, min: 60 },
+      { ...first, ped: 100, t0: cutoff, min: 60, rc: other },
+      { ...first, ped: 101, t0: cutoff, min: 60 },
+    ];
+    const fixture = { ...engine, dataset: { ...engine.dataset, prod } };
+    const rows = portfolio(fixture, { '100': { h: 2 }, '101': { h: 2, done: true } });
+    expect(rows.find((r) => r.ped === '100')).toMatchObject({ machined: 150, recent: 120, status: 'review', done: false, remaining: 0, finish: null });
+    expect(rows.find((r) => r.ped === '101')).toMatchObject({ machined: 60, status: 'ok', done: true });
   });
 
-  it('carga das próximas 8 semanas igual à v2.2', () => {
-    const full = engine.agg({ from: engine.util.s2iso(engine.dataset.minPd), to: engine.util.s2iso(engine.dataset.maxPd) });
-    const W = weeklyLoad(engine, full, portfolio(engine, ref.pv.cart as Record<string, CartEntry>));
-    expect(W.map((w) => w.from)).toEqual(ref.pv.W.map((w) => w.d0));
-    W.forEach((w, i) => {
-      const x = ref.pv.W[i];
-      expect(w.orders).toEqual(x.pvs);
-      for (const [g, v] of Object.entries(x.load)) expect(w.load[g], `load ${g}`).toBeCloseTo(v as number, 4);
-      for (const [g, v] of Object.entries(x.cap)) expect(w.cap[g], `cap ${g}`).toBeCloseTo(v as number, 4);
+  it('usa a escala futura sem o corte histórico e respeita folga, inatividade e sábado convocado', async () => {
+    const { engine: e } = await loadTestEngine();
+    const rc = Object.keys(e.dataset.machines)[0];
+    const weekday = '2026-11-03', saturday = '2026-11-07', ym = '2026-11';
+    const group = e.grpOf(rc);
+    const modes = (mode: 'fixo' | 'inativo'): EngineConfig['escala'] => ({
+      [ym]: Object.fromEntries(Object.keys(e.dataset.machines).map((k): [string, EngineConfig['escala'][string][string]] => [
+        k, { modo: k === rc ? mode : 'inativo', obs: '', turnos: k === rc ? { T1: '' } : {} },
+      ])),
     });
+    e.setConfig({ ...e.config, escala: modes('fixo'), cal: {
+      '2026-11-02': { t: 'fer', sh: [] }, [weekday]: { t: 'folga', sh: [] },
+      [saturday]: { t: 'util', sh: ['T1'] },
+    } });
+    expect(e.capParts(rc, saturday).n).toBe(0);
+    expect(e.capParts(rc, saturday, true).op).toBe(480);
+    const rows = portfolio(e, { '888888': { h: 4, due: saturday, g: group } });
+    const week = weeklyLoad(e, full(e), rows).find((w) => w.from === '2026-11-02')!;
+    expect(week.cap[group]).toBe(4 * 480);
+    expect(week.load[group]).toBe(240);
+    e.setConfig({ ...e.config, escala: modes('inativo') });
+    expect(weeklyLoad(e, full(e), rows).find((w) => w.from === week.from)?.cap[group]).toBe(0);
+  });
+
+  it('usa média histórica para escala pendente e ignora data de entrega inválida', () => {
+    const A = full(engine);
+    const rows = portfolio(engine, ref.pv.cart as Record<string, CartEntry>);
+    const groups = weeklyLoad(engine, A, rows);
+    expect(groups).toHaveLength(8);
+    expect(groups.some((w) => Object.values(w.cap).some((c) => c > 0))).toBe(true);
+    const invalid = portfolio(engine, { '888888': { h: 10, due: '2026-11-31' } }).find((r) => r.ped === '888888')!;
+    expect(invalid.due).toBeNull();
+    expect(weeklyLoad(engine, A, [invalid]).every((w) => !w.orders.length)).toBe(true);
   });
 });
 

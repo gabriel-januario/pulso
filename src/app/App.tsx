@@ -53,7 +53,7 @@ const VIEWS: Record<string, { title: string; render: ComponentType<ViewProps>; o
   configuracoes: { title: 'Configurações', render: Settings, ownFilters: true },
   relatorios: { title: 'Relatórios', render: Reports },
 };
-const routeOf = () => { const id = location.hash.replace(/^#\/?/, '').split('?')[0]; return VIEWS[id] ? id : 'geral'; };
+const routeOf = () => { const id = location.hash.replace(/^#\/?/, '').split('?')[0]; return Object.hasOwn(VIEWS, id) ? id : 'geral'; };
 
 function Shell({ pulso }: { pulso: Pulso }) {
   const { engine } = pulso;
@@ -70,7 +70,7 @@ function Shell({ pulso }: { pulso: Pulso }) {
   }, []);
   const navigate = (id: string) => { location.hash = `#/${id}?${location.hash.split('?')[1] ?? ''}`; window.scrollTo(0, 0); };
 
-  const groups = useMemo(() => engine.agg({ ...all, grp: 'all' }).G.map((g) => g.g), [engine, all]);
+  const groups = useMemo(() => engine.agg({ ...all, grp: 'all' }).G.map((g) => g.g), [engine, all, config.version]);
   const { range, grp, period } = filters.state;
   const V = VIEWS[view];
   const section = SECTIONS.find((s) => s.items.some((i) => i.id === view))?.label ?? '';

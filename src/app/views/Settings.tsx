@@ -131,7 +131,7 @@ export function Settings({ pulso, config }: ViewProps) {
         <div className="ph"><h2>Base de dados</h2></div>
         <div className="pb">
           <p>{int(engine.dataset.nAll)} apontamentos · {int(engine.dataset.prod.length)} de produção em usinagem · {int(engine.dataset.stops.length)} paradas ligadas à usinagem · {int(engine.dataset.nAll - engine.dataset.prod.length - engine.dataset.stops.length)} fora do escopo dos indicadores.</p>
-          <p className="meta">Período de {engine.util.fmtDT(engine.dataset.minPd * 1440 + engine.constants.DAY0)} a {engine.util.fmtDT(engine.dataset.lastT)} · {Object.keys(engine.dataset.machines).length} recursos · base SQLite fictícia carregada no navegador.</p>
+          <p className="meta">Período de {engine.util.fmtDT(engine.dataset.minPd * 1440 + engine.constants.DAY0)} a {engine.util.fmtDT(engine.dataset.lastT)} · {Object.keys(engine.dataset.machines).length} recursos · base SQLite de demonstração transformada e carregada no navegador.</p>
         </div>
       </section>
     </>

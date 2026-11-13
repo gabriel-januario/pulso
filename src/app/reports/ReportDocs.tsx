@@ -13,7 +13,7 @@ import { groupColor, STATUS_BAR } from '../theme';
 export type ReportKind = 'performance' | 'perdas' | 'he' | 'carteira';
 export const REPORTS: { kind: ReportKind; title: string; text: string; excel?: boolean; scope: 'period' | 'month' | 'none' }[] = [
   { kind: 'performance', title: 'Performance da produção', text: 'Utilização contra a meta, destino da capacidade, grupos, cada recurso, principais paradas e recursos abaixo da meta.', excel: true, scope: 'period' },
-  { kind: 'perdas', title: 'Perdas: manutenção e improdutivos', text: 'Tempo real de máquina parada, MTTR e MTBF, manutenção não apontada, pareto de motivos e máquinas mais afetadas.', scope: 'period' },
+  { kind: 'perdas', title: 'Perdas: manutenção e improdutivos', text: 'Tempo de máquina parada e médias por evento, manutenção não apontada, pareto de motivos e máquinas mais afetadas.', scope: 'period' },
   { kind: 'he', title: 'Horas extras', text: 'HE realizada por recurso e grupo no mês do fim do período, e a programação lançada.', scope: 'month' },
   { kind: 'carteira', title: 'Carteira e prazos', text: 'Pedidos atrasados, em risco e sem ritmo, término previsto e carga das próximas semanas.', scope: 'none' },
 ];
@@ -120,7 +120,7 @@ export function LossesDoc({ engine, A }: { engine: Engine; A: AggResult }) {
     <>
       <Kpis items={[
         ['Manutenção real', `${hours(M.real)} h`, `${M.n} eventos`, '#6250d6'], ['Não apontada', `${hours(M.hidden)} h`, M.real ? `${pct(M.hidden / M.real)} da manutenção` : undefined, '#a78bfa'],
-        ['MTTR', M.mttr != null ? `${hours1(M.mttr)} h` : '—', 'tempo médio de reparo'], ['MTBF', M.mtbf != null ? `${hours1(M.mtbf)} h` : '—', 'produção entre falhas'],
+        ['Parada média por evento', M.mttr != null ? `${hours1(M.mttr)} h` : '—'], ['Produção por evento', M.mtbf != null ? `${hours1(M.mtbf)} h` : '—'],
         ['Improdutivo', `${hours(I.total)} h`, A.T.cap ? `${pct(I.total / A.T.cap)} da capacidade` : undefined, '#eb6834'], ['Sem apontamento', `${hours(A.T.gap)} h`, 'capacidade sem registro', '#b9c6d6'],
       ]} />
       <Sec n={1} title="Manutenção por máquina" note="tempo real parado contra o apontado">
@@ -221,14 +221,14 @@ function OrderTable({ rows }: { rows: PortfolioRow[] }) {
 export function PortfolioDoc({ engine }: { engine: Engine }) {
   const rows = portfolio(engine, engine.config.cart ?? {});
   const full = engine.agg({ from: engine.util.s2iso(engine.dataset.minPd), to: engine.util.s2iso(engine.dataset.maxPd) });
-  const W = weeklyLoad(engine, full, rows), groups = engine.constants.GRP_ORDER.filter((g) => W.some((w) => (w.cap[g] ?? 0) > 0 || (w.load[g] ?? 0) > 0));
+  const W = weeklyLoad(engine, full, rows), groups = [...new Set([...engine.constants.GRP_ORDER, ...W.flatMap((w) => [...Object.keys(w.cap), ...Object.keys(w.load)])])].filter((g) => W.some((w) => (w.cap[g] ?? 0) > 0 || (w.load[g] ?? 0) > 0));
   const n = (s: string) => rows.filter((r) => r.status === s).length;
-  const attention = rows.filter((r) => ['late', 'risk', 'stop'].includes(r.status)), onTime = rows.filter((r) => r.status === 'on');
+  const attention = rows.filter((r) => ['late', 'risk', 'stop', 'review'].includes(r.status)), onTime = rows.filter((r) => r.status === 'on');
   return (
     <>
       <Kpis items={[['PVs na carteira', int(rows.length)], ['Atrasados', int(n('late')), undefined, '#d64b45'], ['Em risco', int(n('risk')), undefined, '#e3a33b'], ['Sem ritmo', int(n('stop')), undefined, '#e3a33b'], ['No prazo', int(n('on')), undefined, '#1f8a4c'], ['Horas a usinar', `${hours(rows.filter((r) => !r.done).reduce((q, r) => q + (r.remaining ?? 0), 0))} h`]]} />
-      <Sec n={1} title="Pedidos que pedem ação" note="atrasados, em risco ou sem usinagem nos últimos 14 dias">
-        {attention.length ? <OrderTable rows={attention} /> : <p className="rempty">Nenhum pedido atrasado, em risco ou sem ritmo.</p>}
+      <Sec n={1} title="Pedidos que pedem ação" note="atrasados, em risco, sem projeção ou com saldo a validar">
+        {attention.length ? <OrderTable rows={attention} /> : <p className="rempty">Nenhum pedido que exija ação neste recorte.</p>}
       </Sec>
       <Sec n={2} title="Carga × capacidade nas próximas semanas" note="% da capacidade de cada grupo ocupada pela carteira">
         <table className="rt sm ld">

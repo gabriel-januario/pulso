@@ -47,7 +47,7 @@ export function Maintenance({ pulso, filters, config }: ViewProps) {
         <KpiCard label="Manutenção apontada" value={hours(M.ap)} unit="h" color={SERIES.maint} sub={`${pct(M.real ? M.ap / M.real : null)} da parada real`} />
         <KpiCard label="Não apontado" value={hours(M.hidden)} unit="h" color={SERIES.maint} sub={`${pct(M.real ? M.hidden / M.real : null)} da parada real`} />
         <KpiCard label="A confirmar" value={hours(M.suspectMinutes)} unit="h" color={SERIES.stop} sub={`${M.suspects.length} prováveis paradas`} />
-        <KpiCard label="MTTR" value={M.mttr == null ? '—' : dec1(M.mttr / 60)} unit={M.mttr == null ? undefined : 'h'} sub={`MTBF ${M.mtbf == null ? '—' : `${int(M.mtbf / 60)} h`}`} />
+        <KpiCard label="Parada média por evento" value={M.mttr == null ? '—' : dec1(M.mttr / 60)} unit={M.mttr == null ? undefined : 'h'} sub={`Produção por evento ${M.mtbf == null ? '—' : `${int(M.mtbf / 60)} h`}`} />
       </section>
 
       <section className="panel">

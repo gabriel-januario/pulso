@@ -2,7 +2,7 @@ import type { Measures } from '../../engine';
 import { hours1, pct } from '../format';
 
 const PARTS: { key: 'used' | 'accountStop' | 'accountMaint' | 'uncovered' | 'noLoad' | 'gap'; label: string; color: string }[] = [
-  { key: 'used', label: 'Produção', color: '#2a78d6' },
+  { key: 'used', label: 'Produção alocada', color: '#2a78d6' },
   { key: 'accountStop', label: 'Improdutivo', color: '#eb6834' },
   { key: 'accountMaint', label: 'Manutenção', color: '#6250d6' },
   { key: 'uncovered', label: 'Sem cobertura', color: '#b45309' },

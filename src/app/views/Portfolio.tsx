@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ORDER_STATUS, portfolio, weeklyLoad, type OrderStatus, type PortfolioRow } from '../../analytics/management';
+import { isIsoDay } from '../../analytics/period';
 import type { CartEntry } from '../../engine';
 import { KpiCard } from '../components/KpiCard';
 import { dec1, dm, dmy, hours, hours1, int, pct } from '../format';
@@ -13,7 +14,7 @@ export function Portfolio({ pulso, config }: ViewProps) {
   const { engine } = pulso;
   const cart = engine.config.cart ?? {};
   const rows = useMemo(() => portfolio(engine, cart), [engine, config.version]);
-  const full = useMemo(() => engine.agg({ from: engine.util.s2iso(engine.dataset.minPd), to: engine.util.s2iso(engine.dataset.maxPd) }), [engine]);
+  const full = useMemo(() => engine.agg({ from: engine.util.s2iso(engine.dataset.minPd), to: engine.util.s2iso(engine.dataset.maxPd) }), [engine, config.version]);
   const W = useMemo(() => weeklyLoad(engine, full, rows), [engine, full, rows]);
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all');
   const [form, setForm] = useState({ ped: '', g: GROUP_ORDER[0], h: '', due: '' });
@@ -32,23 +33,26 @@ export function Portfolio({ pulso, config }: ViewProps) {
   const add = () => {
     const ped = form.ped.trim();
     if (!/^\d+$/.test(ped)) return setMsg('Informe o número do PV.');
+    if (form.h && (!Number.isFinite(+form.h * 60) || +form.h <= 0)) return setMsg('Informe um número positivo de horas.');
+    if (form.due && !isIsoDay(form.due)) return setMsg('Informe uma data de entrega válida.');
     if (rows.some((r) => r.ped === ped)) return setMsg(`O PV ${ped} já está na carteira.`);
     save({ ...cart, [ped]: { g: form.g, ...(+form.h > 0 ? { h: +form.h } : {}), ...(form.due ? { due: form.due } : {}) } }, `PV ${ped} incluído.`);
     setForm({ ...form, ped: '', h: '', due: '' });
   };
   const importPaste = () => {
     const next = { ...cart };
-    let n = 0;
+    let n = 0, invalid = 0;
     for (const line of paste.split(/\r?\n/)) {
       const c = line.split(/[\t;]/).map((x) => x.trim());
       if (!/^\d+$/.test(c[0] ?? '')) continue;
-      const h = parseFloat((c[1] ?? '').replace(',', '.'));
-      const d = (c[2] ?? '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/), due = d ? `${d[3]}-${d[2]}-${d[1]}` : /^\d{4}-\d{2}-\d{2}$/.test(c[2] ?? '') ? c[2] : undefined;
+      const h = Number((c[1] ?? '').replace(',', '.'));
+      const d = (c[2] ?? '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/), due = d ? `${d[3]}-${d[2]}-${d[1]}` : c[2];
+      if ((due && !isIsoDay(due)) || (c[1] && (!Number.isFinite(h * 60) || h <= 0)) || (!h && !due)) { invalid++; continue; }
       next[c[0]] = { ...(next[c[0]] ?? {}), ...(h > 0 ? { h } : {}), ...(due ? { due } : {}) };
       n++;
     }
     if (!n) return setMsg('Nenhuma linha reconhecida. Use: PV; horas; entrega (DD/MM/AAAA).');
-    save(next, `${n} PV${n > 1 ? 's' : ''} atualizado${n > 1 ? 's' : ''}.`);
+    save(next, `${n} PV${n > 1 ? 's' : ''} atualizado${n > 1 ? 's' : ''}.${invalid ? ` ${invalid} linha(s) com horas ou data inválidas.` : ''}`);
     setPaste('');
   };
 
@@ -57,7 +61,7 @@ export function Portfolio({ pulso, config }: ViewProps) {
   const remaining = open.reduce((q, r) => q + (r.remaining ?? 0), 0);
   const shown = filter === 'all' ? rows : rows.filter((r) => r.status === filter);
   const hidden = Object.entries(cart).filter(([, c]) => c.hide).map(([k]) => k);
-  const groups = GROUP_ORDER.filter((g) => W.some((w) => (w.cap[g] ?? 0) > 0 || (w.load[g] ?? 0) > 0));
+  const groups = [...new Set([...GROUP_ORDER, ...W.flatMap((w) => [...Object.keys(w.cap), ...Object.keys(w.load)])])].filter((g) => W.some((w) => (w.cap[g] ?? 0) > 0 || (w.load[g] ?? 0) > 0));
 
   return (
     <>
@@ -65,13 +69,14 @@ export function Portfolio({ pulso, config }: ViewProps) {
         <KpiCard hero label="PVs na carteira" value={int(rows.length)} sub={`${count('ok')} concluídos · base até ${dmy(today)}`} />
         <KpiCard label="Atrasados" value={int(count('late'))} color="#d64b45" sub="entrega já passou" />
         <KpiCard label="Em risco" value={int(count('risk'))} color="#e3a33b" sub="término previsto após a entrega" />
-        <KpiCard label="Sem ritmo" value={int(count('stop'))} color="#e3a33b" sub="sem usinagem em 14 dias" />
+        <KpiCard label="Sem ritmo" value={int(count('stop'))} color="#e3a33b" sub="sem projeção de término" />
         <KpiCard label="Horas a usinar" value={hours(remaining)} unit="h" sub="PVs com previsão em aberto" />
+        <KpiCard label="Validar saldo" value={int(count('review'))} color="#e3a33b" sub="horas previstas atingidas · confirme a conclusão" />
         <KpiCard label="Sem previsão" value={int(count('np'))} color="#94a3b8" sub="informe horas e entrega" />
       </section>
 
       <section className="panel">
-        <div className="ph"><h2>Carga da carteira × capacidade</h2><span className="meta">próximas 8 semanas · restante de cada PV distribuído nos dias úteis até a entrega</span></div>
+        <div className="ph"><h2>Carga da carteira × capacidade</h2><span className="meta">próximas 8 semanas · carga distribuída pelo calendário fabril · média histórica para escala pendente</span></div>
         <div className="pb tw">
           <table className="t ldt">
             <thead><tr><th>Grupo</th>{W.map((w) => <th key={w.from} className="n">{dm(w.from)}<small>a {dm(w.to)}</small></th>)}</tr></thead>
@@ -156,7 +161,7 @@ function Row({ r, today, patch }: { r: PortfolioRow; today: string; patch(ped: s
       <td className="n"><input className="ctl num" type="number" min={0} aria-label={`Horas previstas do PV ${r.ped}`} defaultValue={r.entry.h ?? ''} onBlur={(e) => { const v = +e.target.value; if ((v || undefined) !== r.entry.h) patch(r.ped, { h: v > 0 ? v : undefined }); }} /></td>
       <td className="n">{r.remaining != null ? `${hours1(r.remaining)} h` : '—'}</td>
       <td><input className={`ctl dt${r.due && r.due < today && !r.done ? ' late' : ''}`} type="date" aria-label={`Entrega do PV ${r.ped}`} defaultValue={r.entry.due ?? ''} onBlur={(e) => { if ((e.target.value || undefined) !== r.entry.due) patch(r.ped, { due: e.target.value || undefined }); }} /></td>
-      <td>{r.finish ? dmy(r.finish) : r.done ? '—' : r.remaining ? <span className="meta">sem ritmo</span> : '—'}</td>
+      <td>{r.finish ? dmy(r.finish) : r.done ? '—' : r.remaining ? <span className="meta">sem projeção</span> : '—'}</td>
       <td className="acts">
         <label className="ck"><input type="checkbox" checked={!!r.entry.done} onChange={(e) => patch(r.ped, { done: e.target.checked })} /> concluído</label>
         <button type="button" className="lnk" onClick={() => patch(r.ped, { hide: true })} aria-label={`Ocultar PV ${r.ped}`}>ocultar</button>

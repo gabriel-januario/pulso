@@ -12,19 +12,24 @@ type State = { status: 'loading' } | { status: 'error'; message: string } | { st
 export function usePulso(): State {
   const [state, setState] = useState<State>({ status: 'loading' });
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
+    let database: Database | undefined;
     (async () => {
       try {
-        const res = await fetch(`${import.meta.env.BASE_URL}pulso.db`);
+        const res = await fetch(`${import.meta.env.BASE_URL}pulso.db`, { signal: controller.signal });
         if (!res.ok) throw new Error(`Não foi possível baixar o banco de dados (HTTP ${res.status}).`);
         const db = await openDatabase(new Uint8Array(await res.arrayBuffer()), wasmUrl);
+        if (controller.signal.aborted) { db.close(); return; }
+        database = db;
         const engine = createEngine(loadRawDataset(db));
-        if (!cancelled) setState({ status: 'ready', pulso: { db, engine } });
+        setState({ status: 'ready', pulso: { db, engine } });
       } catch (err) {
-        if (!cancelled) setState({ status: 'error', message: err instanceof Error ? err.message : String(err) });
+        database?.close();
+        database = undefined;
+        if (!controller.signal.aborted) setState({ status: 'error', message: err instanceof Error ? err.message : String(err) });
       }
     })();
-    return () => { cancelled = true; };
+    return () => { controller.abort(); database?.close(); };
   }, []);
   return state;
 }

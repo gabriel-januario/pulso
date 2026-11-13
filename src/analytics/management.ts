@@ -1,5 +1,7 @@
 import type { AggResult, CartEntry, Engine, MachineAgg, ProdRecord } from '../engine';
-import { addDays, weekday } from './period';
+import { mergedIntervals, spanOf, type Interval } from '../engine/core/intervals';
+import { isWork } from './planning';
+import { addDays, isIsoDay, weekday } from './period';
 
 /* Telas de gestão: Carteira e prazos, Simulador, Operadores e Qualidade dos dados.
    Funções puras, testadas contra a v2.2 em tests/management.test.ts. */
@@ -8,10 +10,10 @@ const DAY = 1440;
 
 /* =============================== CARTEIRA =============================== */
 
-export type OrderStatus = 'late' | 'risk' | 'stop' | 'on' | 'np' | 'ok';
+export type OrderStatus = 'late' | 'risk' | 'stop' | 'on' | 'np' | 'review' | 'ok';
 export const ORDER_STATUS: Record<OrderStatus, { label: string; tone: 'crit' | 'warn' | 'good' | 'done' | 'none' }> = {
   late: { label: 'Atrasado', tone: 'crit' }, risk: { label: 'Em risco', tone: 'warn' }, stop: { label: 'Sem ritmo', tone: 'warn' },
-  on: { label: 'No prazo', tone: 'good' }, ok: { label: 'Concluído', tone: 'done' }, np: { label: 'Sem previsão', tone: 'none' },
+  review: { label: 'Validar saldo', tone: 'warn' }, on: { label: 'No prazo', tone: 'good' }, ok: { label: 'Concluído', tone: 'done' }, np: { label: 'Sem previsão', tone: 'none' },
 };
 
 export interface PortfolioRow {
@@ -29,7 +31,7 @@ export interface PortfolioRow {
   manual: boolean;
 }
 
-const isWorkday = (engine: Engine, iso: string) => { const w = weekday(iso); return w >= 1 && w <= 5 && !engine.constants.HOL[iso]; };
+const isWorkday = (engine: Engine, iso: string) => isWork(engine.dayCfg(iso));
 
 /**
  * Carteira: PVs com apontamento nos últimos 30 dias da base, mais os cadastrados pelo usuário.
@@ -38,44 +40,53 @@ const isWorkday = (engine: Engine, iso: string) => { const w = weekday(iso); ret
  */
 export function portfolio(engine: Engine, cart: Record<string, CartEntry>): PortfolioRow[] {
   const { s2iso, iso2s } = engine.util, today = s2iso(engine.dataset.maxPd), T = engine.dataset.lastT;
-  const by = new Map<string, { min: number; r14: number; t0: number; t1: number; g: Map<string, number>; ops: Set<number> }>();
+  const by = new Map<string, { t0: number; t1: number; resources: Map<string, Interval[]>; ops: Set<number> }>();
   for (const x of engine.dataset.prod) {
-    const k = String(x.ped || '0');
-    if (k === '0' || !engine.dataset.machines[x.rc]) continue;
+    if (!x.ped || !engine.dataset.machines[x.rc]) continue;
+    const k = String(x.ped), end = x.t0 + x.min;
     let o = by.get(k);
-    if (!o) { o = { min: 0, r14: 0, t0: x.t0, t1: x.t0, g: new Map(), ops: new Set() }; by.set(k, o); }
-    o.min += x.min; if (x.t0 >= T - 14 * DAY) o.r14 += x.min;
-    o.t0 = Math.min(o.t0, x.t0); o.t1 = Math.max(o.t1, x.t0 + x.min);
-    const g = engine.grpOf(x.rc); o.g.set(g, (o.g.get(g) ?? 0) + x.min); o.ops.add(x.opn);
+    if (!o) { o = { t0: x.t0, t1: end, resources: new Map(), ops: new Set() }; by.set(k, o); }
+    o.t0 = Math.min(o.t0, x.t0);
+    o.t1 = Math.max(o.t1, end);
+    const intervals = o.resources.get(x.rc) ?? [];
+    intervals.push([x.t0, end]);
+    o.resources.set(x.rc, intervals);
+    o.ops.add(x.opn);
   }
   const keys = new Set([...[...by.entries()].filter(([, o]) => o.t1 >= T - 30 * DAY).map(([k]) => k), ...Object.keys(cart)]);
   const rows: PortfolioRow[] = [];
   for (const k of keys) {
     const o = by.get(k), c = cart[k] ?? {};
     if (c.hide) continue;
-    const machined = o?.min ?? 0, recent = o?.r14 ?? 0;
-    const planned = c.h && c.h > 0 ? c.h * 60 : null;
-    const done = !!c.done || (planned != null && machined >= planned);
+    let machined = 0, recent = 0;
+    const byGroup = new Map<string, number>();
+    for (const [rc, intervals] of o?.resources ?? []) {
+      const union = mergedIntervals(intervals);
+      const minutes = spanOf(union), g = engine.grpOf(rc);
+      machined += minutes;
+      recent += union.reduce((sum, [a, b]) => sum + Math.max(0, Math.min(T, b) - Math.max(T - 14 * DAY, a)), 0);
+      byGroup.set(g, (byGroup.get(g) ?? 0) + minutes);
+    }
+    const planned = c.h != null && c.h > 0 && Number.isFinite(c.h * 60) ? c.h * 60 : null;
+    const due = isIsoDay(c.due) ? c.due : null;
+    const done = c.done === true;
     const remaining = planned != null ? Math.max(0, planned - machined) : null;
     const pace = recent / 14;
     let finish: string | null = null;
-    if (remaining != null && !done) {
-      if (remaining <= 0) finish = today;
-      else if (pace > 0) {
-        let left = remaining, p = iso2s(today);
-        const limit = p + 366;
-        while (left > 0 && p < limit) { p++; if (isWorkday(engine, s2iso(p))) left -= (pace * 7) / 5; }
-        finish = left > 0 ? null : s2iso(p);
-      }
+    if (remaining != null && remaining > 0 && !done && pace > 0) {
+      let left = remaining, p = iso2s(today);
+      const limit = p + 366;
+      while (left > 0 && p < limit) { p++; if (isWorkday(engine, s2iso(p))) left -= (pace * 7) / 5; }
+      finish = left > 0 ? null : s2iso(p);
     }
     let status: OrderStatus = 'np';
     if (done) status = 'ok';
-    else if (planned != null && c.due) status = c.due < today ? 'late' : !finish ? 'stop' : finish > c.due ? 'risk' : 'on';
-    const gt = o ? [...o.g.values()].reduce((q, v) => q + v, 0) : 0;
-    const groups: [string, number][] = gt ? [...o!.g.entries()].map(([g, v]) => [g, v / gt] as [string, number]).sort((p, q) => q[1] - p[1]) : [[c.g || 'Outros postos', 1]];
-    rows.push({ ped: k, entry: c, machined, recent, orders: o?.ops.size ?? 0, first: o?.t0 ?? null, last: o?.t1 ?? null, planned, done, remaining, pace, due: c.due || null, finish, status, groups, manual: !o });
+    else if (remaining === 0) status = 'review';
+    else if (planned != null && due) status = due < today ? 'late' : !finish ? 'stop' : finish > due ? 'risk' : 'on';
+    const groups: [string, number][] = machined ? [...byGroup].map(([g, v]): [string, number] => [g, v / machined]).sort((p, q) => q[1] - p[1]) : [[c.g || 'Outros postos', 1]];
+    rows.push({ ped: k, entry: c, machined, recent, orders: o?.ops.size ?? 0, first: o?.t0 ?? null, last: o?.t1 ?? null, planned, done, remaining, pace, due, finish, status, groups, manual: !o });
   }
-  const order: Record<OrderStatus, number> = { late: 0, risk: 1, stop: 2, on: 3, np: 4, ok: 5 };
+  const order: Record<OrderStatus, number> = { late: 0, risk: 1, review: 2, stop: 3, on: 4, np: 5, ok: 6 };
   return rows.sort((p, q) => order[p.status] - order[q.status] || (p.due || '9').localeCompare(q.due || '9') || q.machined - p.machined);
 }
 
@@ -89,7 +100,7 @@ export interface LoadWeek { from: string; to: string; load: Record<string, numbe
 export function weeklyLoad(engine: Engine, full: AggResult, rows: PortfolioRow[], weeks = 8): LoadWeek[] {
   const { s2iso, iso2s } = engine.util, t = engine.dataset.maxPd;
   let w0 = t + 1 - ((weekday(s2iso(t + 1)) + 6) % 7);
-  if (t + 1 - w0 >= 5) w0 += 7;
+  if (t + 1 - w0 >= 5 && ![t + 1, w0 + 6].some((p) => isWorkday(engine, s2iso(p)))) w0 += 7;
   const start = Math.max(t + 1, w0);
   const W = Array.from({ length: weeks }, (_, k) => ({ from: s2iso(w0 + 7 * k), to: s2iso(w0 + 7 * k + 6), load: {} as Record<string, number>, cap: {} as Record<string, number>, orders: [] as string[] }));
   const recent = full.days.slice(-28);
@@ -100,17 +111,35 @@ export function weeklyLoad(engine: Engine, full: AggResult, rows: PortfolioRow[]
     for (const wk of W) for (let p = iso2s(wk.from); p <= iso2s(wk.to); p++) {
       if (p < start) continue;
       const d = s2iso(p);
-      let c = engine.capParts(a.m.rc, d).n;
-      if (!(c > 0)) c = engine.constants.HOL[d] ? 0 : avg[weekday(d)];
+      let c = engine.capParts(a.m.rc, d, true).op;
+      if (engine.machCfgM(a.m.rc, d.slice(0, 7)).modo === 'pendente' && isWorkday(engine, d) && c === 0) {
+        c = avg[weekday(d)];
+      }
       wk.cap[a.grp] = (wk.cap[a.grp] || 0) + c;
     }
   }
+  const overrides = [...new Set([...Object.keys(engine.constants.HOL), ...Object.keys(engine.config.cal)])]
+    .filter(isIsoDay).map((d) => ({ p: iso2s(d), delta: Number(isWorkday(engine, d)) - Number(weekday(d) >= 1 && weekday(d) <= 5) }));
+  const horizonEnd = w0 + W.length * 7 - 1;
   for (const o of rows) {
-    if (!(o.remaining && o.remaining > 0) || !o.due || o.done) continue;
+    if (!(o.remaining && o.remaining > 0) || !isIsoDay(o.due) || o.done) continue;
     const end = Math.max(start, iso2s(o.due)), days: number[] = [];
-    for (let p = start; p <= end; p++) if (isWorkday(engine, s2iso(p))) days.push(p);
-    if (!days.length) days.push(start);
-    const per = o.remaining / days.length;
+    const fullWeeks = Math.floor((end - start + 1) / 7);
+    let workdays = fullWeeks * 5;
+    for (let p = start + fullWeeks * 7; p <= end; p++) {
+      const w = weekday(s2iso(p));
+      if (w >= 1 && w <= 5) workdays++;
+    }
+    for (const { p, delta } of overrides) if (p >= start && p <= end) workdays += delta;
+    for (let p = start; p <= Math.min(end, horizonEnd); p++) if (isWorkday(engine, s2iso(p))) days.push(p);
+    if (!workdays) {
+      for (let p = start; p <= horizonEnd; p++) {
+        if (!isWorkday(engine, s2iso(p))) continue;
+        days.push(p);
+        break;
+      }
+    }
+    const per = o.remaining / (workdays || 1);
     for (const p of days) {
       const wk = W[Math.floor((p - w0) / 7)];
       if (!wk) continue;

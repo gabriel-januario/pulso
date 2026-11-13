@@ -115,8 +115,9 @@ em [`db/schema.sql`](../db/schema.sql).
 | `tests/dashboard.test.ts` | filtro cruzado e período de comparação iguais à v2.2; regras dos visuais do Painel BI |
 | `tests/views.test.ts` | baixo desempenho, pedidos, OPs e análise mensal iguais à v2.2 |
 | `tests/losses.test.ts` | manutenção e improdutivos iguais à v2.2 em dois períodos; efeito do quadro de paradas e da confirmação |
-| `tests/management.test.ts` | carteira (situação e término de cada PV), carga das 8 semanas, simulador, operadores e qualidade iguais à v2.2 |
+| `tests/management.test.ts` | regras de horas-máquina, conclusão, calendário e capacidade futura; paridade do simulador, operadores e qualidade |
 | `tests/planning.test.ts` | capacidade de cada recurso e dia do mês, HE realizada e programada, sugestão de titular, cópia de mês iguais à v2.2 |
 | `tests/reports.test.ts` | a planilha Excel gerada fecha com o motor (capacidade, produção, dias, pareto) e usa fórmulas na utilização |
 | `tests/engine-units.test.ts` | peças puras do motor: intervalos, datas, saneamento e migração da configuração |
+| `tests/config-backup.test.ts` | importação atômica e recuperação de configuração local inválida |
 | `tests/db.test.ts` | integridade referencial do banco, consultas SQL e carteira de demonstração |

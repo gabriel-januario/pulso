@@ -7,6 +7,11 @@ const MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho'
 const DAY = 864e5;
 
 export const isoToDate = (iso: string) => new Date(iso + 'T12:00:00Z');
+export function isIsoDay(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = isoToDate(value);
+  return Number.isFinite(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
 export const addDays = (iso: string, n: number) => new Date(isoToDate(iso).getTime() + n * DAY).toISOString().slice(0, 10);
 export const daysBetween = (a: string, b: string) => Math.round((isoToDate(b).getTime() - isoToDate(a).getTime()) / DAY);
 export const lastDayOfMonth = (ym: string) => {

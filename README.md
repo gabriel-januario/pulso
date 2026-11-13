@@ -6,7 +6,7 @@
 
 **[Abrir a demonstração →](https://gabriel-januario.github.io/pulso/)**
 
-React · TypeScript · SQLite no navegador · 78 testes automatizados · base de demonstração transformada
+React · TypeScript · SQLite no navegador · 86 testes automatizados · base de demonstração transformada
 
 </div>
 
@@ -72,7 +72,7 @@ Os filtros ficam na URL (`#/painel?p=2026-10&g=Mandrilhadoras&m=MHMC`): um recor
 
 | | |
 |---|---|
-| ![Painel BI](docs/img/painel-bi.jpg) **Painel BI**: filtro cruzado e comparação com o período anterior | ![Manutenção](docs/img/manutencao.jpg) **Manutenção**: tempo real parado, MTTR, MTBF e quadro de máquinas paradas |
+| ![Painel BI](docs/img/painel-bi.jpg) **Painel BI**: filtro cruzado e comparação com o período anterior | ![Manutenção](docs/img/manutencao.jpg) **Manutenção**: tempo parado, médias por evento e quadro de máquinas paradas |
 | ![Carteira e prazos](docs/img/carteira.jpg) **Carteira e prazos**: término previsto pelo ritmo real e carga das próximas semanas | ![Simulador](docs/img/simulador.jpg) **Simulador**: quanto a utilização sobe recuperando perdas ou abrindo um turno |
 | ![Calendário fabril](docs/img/calendario.jpg) **Calendário fabril**: dias, turnos, escala e exceções que definem a capacidade | ![Relatório em PDF](docs/img/relatorio-pdf.jpg) **Relatório em PDF**: A4, texto selecionável, mesmas contas das telas |
 
@@ -93,11 +93,11 @@ As definições abaixo são o coração do projeto. O detalhamento, com exemplos
 
 ### Como ler os dois números de produção
 
-Na visão geral de outubro de 2026, o cartão indica cerca de **4.788 h dentro da escala**. Esse valor mede a produção apontada dentro dos turnos regulares e compõe o cálculo de utilização. A faixa **Destino da capacidade fixa** atribui **3.916,9 h à produção** no mesmo recorte. Ela distribui as horas líquidas da capacidade por destino e aplica a prioridade de manutenção e falta de cobertura antes de atribuir horas à produção.
+Na visão geral de outubro de 2026, o cartão indica cerca de **4.788 h dentro da escala**. Esse valor mede a produção apontada dentro dos turnos regulares e compõe o cálculo de utilização. A faixa **Destino da capacidade fixa** atribui **3.916,9 h à produção alocada** no mesmo recorte. Ela distribui as horas líquidas da capacidade por destino e aplica a prioridade de manutenção e falta de cobertura antes de atribuir horas à produção.
 
 A diferença de aproximadamente **871 h** resulta desses critérios. Consulte a [distribuição de capacidade no motor de cálculo](src/engine/core.ts) e as [definições dos indicadores](docs/REGRAS-DE-NEGOCIO.md) ao comparar os valores.
 
-A previsão da carteira projeta o saldo com base no ritmo recente de apontamentos. Para usar o resultado no planejamento, confirme se o previsto e o realizado usam a mesma unidade e verifique sobreposições de apontamentos por pedido e recurso.
+A carteira trabalha em horas-máquina. Consolida sobreposições dentro do mesmo pedido e recurso e soma o trabalho em recursos diferentes. Quando o realizado atinge as horas previstas, o pedido fica em **Validar saldo** até a conclusão ser confirmada. A carga futura usa capacidade operacional do calendário e da escala. Uma escala pendente pode usar a média histórica como estimativa. As horas previstas da demo são ilustrativas, e a projeção não considera a sequência de operações nem reserva recursos.
 
 ## Arquitetura
 
@@ -129,13 +129,14 @@ npm test
  ✓ tests/engine.test.ts       paridade com a v2.2 em 5 recortes: totais, cada máquina, grupos, cada dia
  ✓ tests/dashboard.test.ts    filtro cruzado e período de comparação idênticos à v2.2; regras dos visuais
  ✓ tests/views.test.ts        baixo desempenho, pedidos, OPs e análise mensal idênticos à v2.2
- ✓ tests/losses.test.ts       manutenção (MTTR, MTBF, paradas a confirmar) e improdutivos idênticos à v2.2
- ✓ tests/management.test.ts   carteira, carga semanal, simulador, operadores e qualidade idênticos à v2.2
+ ✓ tests/losses.test.ts       manutenção (médias por evento, paradas a confirmar) e improdutivos idênticos à v2.2
+ ✓ tests/management.test.ts   regras da carteira e carga futura; paridade do simulador, operadores e qualidade
  ✓ tests/reports.test.ts      o Excel gerado fecha com o motor: capacidade, produção, dias e pareto
  ✓ tests/planning.test.ts     capacidade do mês, HE realizada e programada, cópia de mês e escala idênticas à v2.2
  ✓ tests/engine-units.test.ts intervalos, datas e saneamento/migração da configuração
  ✓ tests/db.test.ts           integridade referencial, consultas SQL e carteira de demonstração
- Tests  78 passed
+ ✓ tests/config-backup.test.ts validação da importação e recuperação de dados locais
+ Tests  86 passed
 ```
 
 Além da paridade, há testes de invariantes de negócio: o destino da capacidade soma exatamente a capacidade;
@@ -203,7 +204,7 @@ legacy/          PULSO v2.2, a versão de referência dos testes de paridade
 
 ## Sobre os dados
 
-A base de demonstração foi derivada de uma exportação real e passou por transformação. Os nomes de operadores e logins foram substituídos por valores inventados. Chapas, OPs, pedidos e centros de custo foram renumerados. Horários e durações foram alterados. A Metalúrgica Horizonte S.A. é uma empresa fictícia. As horas previstas e datas de entrega da carteira foram geradas para ilustrar situações de planejamento.
+A base de demonstração foi derivada de uma exportação real e passou por transformação. O arquivo SQLite é público, assim como os cadastros e a referência legada versionados neste repositório. Esta transformação não é uma garantia de anonimização irreversível. Use uma base sintética ou explicitamente liberada para publicação ao reproduzir a demonstração com outros dados. Os nomes de operadores e logins foram substituídos por valores inventados. Chapas, OPs, pedidos e centros de custo foram renumerados. Horários e durações foram alterados. A Metalúrgica Horizonte S.A. é uma empresa fictícia. As horas previstas e datas de entrega da carteira foram geradas para ilustrar situações de planejamento.
 
 ---
 
