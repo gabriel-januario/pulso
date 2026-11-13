@@ -12,7 +12,7 @@ Cada apontamento traz: data e hora de início, duração, operador, OP, pedido (
 - **Parada (improdutivo):** apontamentos com origem 900 ou no recurso genérico `IMP`. Nesse caso, o campo
   "operação" guarda o código do motivo.
 - **Operadores de usinagem:** quem tem pelo menos 50% das horas apontadas na usinagem. Só as paradas desses
-  operadores entram na análise — o objetivo é não misturar perdas de outros setores.
+  operadores entram na análise. O objetivo é não misturar perdas de outros setores.
 - **Parada sem máquina:** quando o operador aponta a parada no recurso genérico, o PULSO atribui a parada à
   máquina do último apontamento produtivo daquele operador no mesmo dia. Essas paradas aparecem como
   *inferidas* (mais claras na linha do tempo).
