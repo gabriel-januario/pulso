@@ -553,9 +553,10 @@ return {
   setConfig(next) { cfg = mergeCfg(next); clearCap(); EV = null; },
   agg, status, buildEvents, clearCap,
   machCfg, machCfgM, rosterEntry, rosterModes, grpOf, turnosTxt, dayCfg,
-  capParts, capMin, capSeg, heDay,
+  capParts, capMin, capSeg, heDay, dayWins,
   motName, motCat,
   constants: { DAY0, GRP_ORDER, CATS, HOL, FACULT, ROSTER_MODES, EX_TYPES, MES, WD },
   util: { s2iso, iso2s, hhmm, fmtDT, title, shortNm },
+  get cutT() { return cutT(); },
 };
 }

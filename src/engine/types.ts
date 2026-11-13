@@ -59,6 +59,8 @@ export interface Measures {
 }
 
 export interface Totals extends Measures {
+  heHist: number;
+  operCap: number;
   util: number | null;
   disp: number | null;
   ords: Set<number>;
@@ -86,6 +88,9 @@ export interface ProdRecord {
   ped: number;
   oper: number;
   manual: boolean;
+  /** pedido: item e origem do apontamento */
+  item: number;
+  org: string;
 }
 
 /** Um apontamento de parada. `mach` é a máquina (direta ou inferida pelo operador); `mp` são os minutos dentro do período. */
@@ -96,6 +101,24 @@ export interface StopRecord extends ProdRecord {
   isMan: boolean;
   mp: number;
 }
+
+/** Parada de manutenção consolidada: abre no apontamento de manutenção e fecha no próximo apontamento produtivo. */
+export interface MaintenanceEvent {
+  rc: string;
+  t0: number;
+  end: number;
+  open: boolean;
+  /** o fim foi limitado pela regra de duração máxima */
+  capped: boolean;
+  /** apont = apontamento; conf = confirmada; cal = calendário; manual = quadro de paradas */
+  src: 'apont' | 'conf' | 'cal' | 'manual';
+  /** primeiro apontamento do operador em outra máquina durante a parada */
+  mv: ProdRecord | null;
+}
+export interface MachineEvent { e: MaintenanceEvent; real: number; ap: number; ocult: number }
+
+/** Janela de capacidade (minutos absolutos); `c` é a capacidade líquida da janela e `he` marca hora extra. */
+export interface CapacityWindow { a: number; b: number; c: number; he?: boolean }
 
 export interface MachineAgg extends Measures {
   m: Machine;
@@ -110,6 +133,12 @@ export interface MachineAgg extends Measures {
   /** apontamentos de produção no período */
   recs: ProdRecord[];
   stops: StopRecord[];
+  evs: MachineEvent[];
+  peds: Set<number>;
+  /** máquina com parada aberta no quadro */
+  down: boolean;
+  heHist: number;
+  operCap: number;
   /** manutenção oculta (tempo parado real além do apontado) */
   ocult: number;
 }
@@ -168,8 +197,12 @@ export interface Engine {
   agg(opt: AggOptions): AggResult;
   status(util: number | null): Status;
   grpOf(rc: string): string;
+  /** janelas de capacidade do dia produtivo p (serial) */
+  dayWins(rc: string, p: number): CapacityWindow[];
+  /** fim da base em minutos absolutos (a capacidade não é contada depois disso) */
+  readonly cutT: number;
   motName(code: number | string): string;
   motCat(code: number | string): string;
-  constants: { DAY0: number; GRP_ORDER: string[]; MES: string[]; WD: string[]; [key: string]: unknown };
-  util: { s2iso(serial: number): string; iso2s(iso: string): number; title(s: string): string; [key: string]: unknown };
+  constants: { DAY0: number; GRP_ORDER: string[]; MES: string[]; WD: string[]; CATS: [string, string][]; [key: string]: unknown };
+  util: { s2iso(serial: number): string; iso2s(iso: string): number; title(s: string): string; shortNm(s: string): string; hhmm(t: number): string; fmtDT(t: number): string };
 }
