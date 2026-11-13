@@ -1,8 +1,13 @@
-# Publica a demo no GitHub Pages. Rode manualmente (Actions → Publicar demo → Run workflow)
-# depois de ativar Settings → Pages → Source: GitHub Actions.
+# Publica a demo no GitHub Pages a cada push na main (só se testes e build passarem).
+# Também pode ser disparado à mão em Actions → Publicar demo.
 name: Publicar demo
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
+concurrency:
+  group: pages
+  cancel-in-progress: true
 permissions:
   contents: read
   pages: write

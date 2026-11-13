@@ -4,6 +4,8 @@
 
 **Utilização, capacidade e perdas de um parque de usinagem, calculadas a partir dos apontamentos do ERP.**
 
+**[Abrir a demonstração →](https://gabriel-januario.github.io/pulso/)**
+
 React · TypeScript · SQLite no navegador · 78 testes automatizados · dados 100% fictícios
 
 </div>
@@ -179,7 +181,7 @@ legacy/          PULSO v2.2, a versão de referência dos testes de paridade
 - [x] Horas extras · Calendário fabril · Configurações
 - [x] Relatórios em PDF e Excel
 - [x] Núcleo do motor em TypeScript estrito, separado em calendário, intervalos, configuração e base
-- [ ] Publicação da demonstração no GitHub Pages
+- [x] Demonstração publicada no GitHub Pages, atualizada a cada push na `main` com os testes verdes
 
 ## Sobre os dados
 
