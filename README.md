@@ -157,9 +157,7 @@ apontamento produtivo, a ideia de mostrar a utilização "sem o destaque" para r
 desenho de cada tela a partir das perguntas que a gestão faz. Também é minha a validação: os critérios de cada
 indicador e, nesta versão, a exigência de que todo número continue idêntico ao da versão anterior.
 
-**Onde usei IA:** usei o Claude (Anthropic) como par de programação — para escrever e refatorar código, montar a
-estrutura em React e TypeScript, escrever testes a partir dos critérios que defini e revisar o enquadramento
-das telas. Os commits feitos nessa parceria trazem a linha `Co-Authored-By`.
+**Onde usei IA:** usei IA como apoio à programação, à refatoração, à estruturação da interface e à escrita de testes a partir dos critérios que defini.
 
 Essa divisão é, na minha visão, o jeito certo de usar IA em transformação digital: quem conhece o processo
 decide *o que* precisa ser verdade; a IA acelera o *como*; e testes garantem que o resultado continua correto.
