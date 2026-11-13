@@ -1,7 +1,7 @@
 import type { Measures } from '../../engine';
 import { hours1, pct } from '../format';
 
-const PARTS: { key: keyof Measures; label: string; color: string }[] = [
+const PARTS: { key: 'used' | 'accountStop' | 'accountMaint' | 'uncovered' | 'noLoad' | 'gap'; label: string; color: string }[] = [
   { key: 'used', label: 'Produção', color: '#2a78d6' },
   { key: 'accountStop', label: 'Improdutivo', color: '#eb6834' },
   { key: 'accountMaint', label: 'Manutenção', color: '#6250d6' },
@@ -11,7 +11,7 @@ const PARTS: { key: keyof Measures; label: string; color: string }[] = [
 ];
 
 /** Para onde foi cada hora da capacidade fixa. As partes somam 100% da capacidade. */
-export function CapacityBar({ totals }: { totals: Measures }) {
+export function CapacityBar({ totals }: { totals: Pick<Measures, 'cap' | 'used' | 'accountStop' | 'accountMaint' | 'uncovered' | 'noLoad' | 'gap'> }) {
   const parts = PARTS.map((p) => ({ ...p, v: totals[p.key] })).filter((p) => p.v > 0.5);
   if (!(totals.cap > 0)) return <p className="empty">Sem capacidade validada no período.</p>;
   return (

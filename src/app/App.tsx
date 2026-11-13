@@ -6,7 +6,11 @@ import { dmy, int } from './format';
 import { TooltipProvider } from './tooltip';
 import { usePulso, type Pulso } from './usePulso';
 import { Dashboard } from './views/Dashboard';
+import { Groups } from './views/Groups';
+import { Machines } from './views/Machines';
+import { Monthly } from './views/Monthly';
 import { Overview } from './views/Overview';
+import { Timeline } from './views/Timeline';
 
 export function App() {
   const state = usePulso();
@@ -15,9 +19,13 @@ export function App() {
   return <TooltipProvider><Shell pulso={state.pulso} /></TooltipProvider>;
 }
 
-const VIEWS: Record<string, { title: string; render: typeof Overview }> = {
+const VIEWS: Record<string, { title: string; render: typeof Overview; ownFilters?: boolean }> = {
   geral: { title: 'Visão geral', render: Overview },
   painel: { title: 'Painel BI', render: Dashboard },
+  mensal: { title: 'Análise mensal', render: Monthly, ownFilters: true },
+  maquinas: { title: 'Máquinas', render: Machines },
+  grupos: { title: 'Grupos de máquinas', render: Groups },
+  linha: { title: 'Linha do tempo', render: Timeline },
 };
 const routeOf = () => { const id = location.hash.replace(/^#\/?/, '').split('?')[0]; return VIEWS[id] ? id : 'geral'; };
 
@@ -25,8 +33,8 @@ function Shell({ pulso }: { pulso: Pulso }) {
   const { engine } = pulso;
   const months = useMemo(() => monthOptions(engine), [engine]);
   const all = useMemo(() => ({ from: engine.util.s2iso(engine.dataset.minPd), to: engine.util.s2iso(engine.dataset.maxPd) }), [engine]);
-  const filters = useFilters(months, all);
   const [view, setView] = useState(routeOf);
+  const filters = useFilters(months, all, view);
   useEffect(() => {
     const on = () => setView(routeOf());
     addEventListener('hashchange', on);
@@ -45,10 +53,10 @@ function Shell({ pulso }: { pulso: Pulso }) {
       <main>
         <header className="top">
           <div className="ttl">
-            <div className="crumb">PULSO · {section} · {dmy(range.from)} a {dmy(range.to)}</div>
+            <div className="crumb">PULSO · {section}{V.ownFilters ? '' : ` · ${dmy(range.from)} a ${dmy(range.to)}`}</div>
             <h1>{V.title}</h1>
           </div>
-          <div className="filters">
+          {!V.ownFilters && <div className="filters">
             <select aria-label="Período" value={period} onChange={(e) => filters.setPeriod(e.target.value)}>
               {period === 'day' && <option value="day">Dia {dmy(range.from)}</option>}
               <option value="all">Todo o período</option>
@@ -58,10 +66,10 @@ function Shell({ pulso }: { pulso: Pulso }) {
               <option value="all">Todos os grupos</option>
               {groups.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
-          </div>
+          </div>}
         </header>
         <div className="view">
-          <V.render pulso={pulso} filters={filters} />
+          <V.render key={view} pulso={pulso} filters={filters} />
         </div>
       </main>
     </div>

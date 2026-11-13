@@ -7,19 +7,21 @@ export interface FilterState {
   range: Period;
   grp: string;
   machines: string[] | null;
+  /** máquina aberta na tela Máquinas */
+  machine: string | null;
   /** período de onde o usuário entrou no detalhe de um dia (para voltar) */
   drillDay: { period: string; range: Period } | null;
 }
 export interface Filters {
   state: FilterState;
-  set(p: Partial<Pick<FilterState, 'grp' | 'machines'>>): void;
+  set(p: Partial<Pick<FilterState, 'grp' | 'machines' | 'machine'>>): void;
   setPeriod(value: string): void;
   drill(day: string | null): void;
   reset(): void;
 }
 
 /** Filtros globais compartilhados pelas telas, guardados na URL (#/tela?p=2026-10&g=…&m=…) para poder compartilhar o link. */
-export function useFilters(months: MonthOption[], all: Period): Filters {
+export function useFilters(months: MonthOption[], all: Period, view = ''): Filters {
   const rangeOf = useCallback((period: string): Period => {
     if (period === 'all') return all;
     return months.find((m) => m.value === period) ?? months[0];
@@ -29,7 +31,7 @@ export function useFilters(months: MonthOption[], all: Period): Filters {
     const q = new URLSearchParams(location.hash.split('?')[1] ?? '');
     const p = q.get('p');
     const period = p && (p === 'all' || months.some((m) => m.value === p)) ? p : months[0].value;
-    return { period, range: rangeOf(period), grp: q.get('g') ?? 'all', machines: q.get('m') ? q.get('m')!.split(',') : null, drillDay: null };
+    return { period, range: rangeOf(period), grp: q.get('g') ?? 'all', machines: q.get('m') ? q.get('m')!.split(',') : null, machine: q.get('r'), drillDay: null };
   });
 
   useEffect(() => {
@@ -38,9 +40,10 @@ export function useFilters(months: MonthOption[], all: Period): Filters {
     if (!state.drillDay) q.set('p', state.period);
     if (state.grp !== 'all') q.set('g', state.grp);
     if (state.machines) q.set('m', state.machines.join(','));
+    if (state.machine && path.startsWith('#/maquinas')) q.set('r', state.machine);
     const next = `${path || '#/'}?${q}`;
     if (next !== location.hash) history.replaceState(null, '', next);
-  }, [state]);
+  }, [state, view]);
 
   return {
     state,
