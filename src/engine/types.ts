@@ -117,6 +117,15 @@ export interface MaintenanceEvent {
 }
 export interface MachineEvent { e: MaintenanceEvent; real: number; ap: number; ocult: number }
 
+/**
+ * Parada provável a confirmar: um improdutivo (não de manutenção) seguido de horas de turno sem produção,
+ * enquanto o operador foi apontar em outra máquina.
+ */
+export interface SuspectStop { rc: string; t0: number; end: number; s: StopRecord; idle: number; mv: ProdRecord; key: string; open: boolean }
+
+/** Parada registrada manualmente no quadro de máquinas paradas (datas em AAAA-MM-DDTHH:MM). */
+export interface ManualStop { id: string; rc: string; ini: string; fim: string | null; tipo: string; obs: string }
+
 /** Janela de capacidade (minutos absolutos); `c` é a capacidade líquida da janela e `he` marca hora extra. */
 export interface CapacityWindow { a: number; b: number; c: number; he?: boolean }
 
@@ -187,6 +196,10 @@ export interface EngineConfig {
   alerta: number;
   shifts: { id: string; nome: string; ini: string; fim: string; int: number; h: number | null; def: boolean }[];
   motivos: Record<string, { n: string; c: string }>;
+  /** quadro de paradas e decisões sobre paradas a confirmar ('m' = manutenção, 'x' = descartada) */
+  paradas: ManualStop[];
+  evt: Record<string, 'm' | 'x'>;
+  man: { maxDias: number; suspH: number };
   [key: string]: unknown;
 }
 
@@ -197,6 +210,10 @@ export interface Engine {
   agg(opt: AggOptions): AggResult;
   status(util: number | null): Status;
   grpOf(rc: string): string;
+  /** eventos de manutenção consolidados de toda a base e paradas a confirmar */
+  buildEvents(): { ev: (MaintenanceEvent & { realAll: number; p?: ManualStop })[]; sus: SuspectStop[] };
+  /** capacidade (min) da máquina dentro do intervalo absoluto [a, b) */
+  capSeg(rc: string, a: number, b: number): number;
   /** janelas de capacidade do dia produtivo p (serial) */
   dayWins(rc: string, p: number): CapacityWindow[];
   /** fim da base em minutos absolutos (a capacidade não é contada depois disso) */
