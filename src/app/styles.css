@@ -435,3 +435,82 @@ p.meta { margin: 0 0 8px; }
 .split.rev { grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); align-items: stretch; }
 @media (max-width: 1100px) { .split, .split.rev { grid-template-columns: minmax(0, 1fr); } }
 .pf .rst { margin-left: auto; }
+
+/* ===== Planejamento: horas extras, calendário, configurações ===== */
+.tbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 18px; }
+.mpick { display: inline-flex; gap: 6px; align-items: center; }
+.mpick .ctl { width: 170px; }
+.mpick .btn { width: 34px; padding: 0; font-size: 16px; }
+.inl { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
+.inl .ctl { min-width: 0; }
+.calhead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 16px; }
+.calhead .copy { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.calk { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); border-top: 1px solid var(--line-2); overflow: hidden; }
+.calk div { margin: 0 -1px -1px 0; border-right: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+.calk div { background: #fff; padding: 10px 18px; display: flex; flex-direction: column; gap: 2px; }
+.calk span { font-size: 11.5px; color: var(--ink-3); }
+.calk b { font-family: var(--num); font-size: 20px; font-weight: 600; }
+.calk b.warn { color: #9a6200; }
+.panel > .note { margin: 12px 18px 0; }
+.note.warn { background: #fff8eb; border-color: #f3dbab; color: #6b4600; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.cal-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .cal-layout { grid-template-columns: minmax(0, 1fr); } }
+.cal-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.cal-wd { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3); text-align: center; padding-bottom: 2px; }
+.cal-date { all: unset; box-sizing: border-box; cursor: pointer; min-height: 84px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; min-width: 0; background: #fff; }
+.cal-date:hover { border-color: #9cc0ee; }
+.cal-date:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.cal-date[aria-pressed='true'] { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(37, 99, 201, .18); }
+.cal-date b { font-family: var(--num); font-size: 16px; }
+.cal-date .ty { font-size: 11px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-date .cp { font-size: 11.5px; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; gap: 4px; margin-top: auto; }
+.cal-date .cp i { font-style: normal; background: #fdeee6; color: #9a3a12; border-radius: 8px; padding: 0 6px; font-size: 10.5px; }
+.cal-date .hi { font-size: 10px; color: #0f7a6c; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-date.work { background: #f6fafe; }
+.cal-date.folga { background: #f3f5f8; color: var(--ink-3); }
+.cal-date.fer, .cal-date.hol { background: #fdf1ef; }
+.cal-date.manut { background: #f5f2ff; }
+.cal-blank { min-height: 84px; }
+.cal-leg { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12px; color: var(--ink-2); }
+.cal-leg span::before { content: ''; display: inline-block; width: 11px; height: 11px; border-radius: 3px; border: 1px solid var(--line); margin-right: 6px; vertical-align: -1px; }
+.cal-leg .work::before { background: #f6fafe; } .cal-leg .folga::before { background: #f3f5f8; } .cal-leg .fer::before { background: #fdf1ef; } .cal-leg .manut::before { background: #f5f2ff; }
+@media (max-width: 640px) {
+  .cal-month { gap: 3px; }
+  .cal-date, .cal-blank { min-height: 56px; padding: 4px; }
+  .cal-date .ty, .cal-date .hi { display: none; }
+  .cal-date b { font-size: 13px; }
+  .cal-date .cp { font-size: 10px; flex-direction: column; }
+}
+.cal-form { display: flex; flex-direction: column; gap: 10px; }
+.cal-form label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; font-weight: 600; color: var(--ink-2); min-width: 0; }
+.cal-form label.ck, .cal-form .checks label { flex-direction: row; align-items: center; gap: 6px; font-weight: 500; font-size: 13px; color: var(--ink); }
+.cal-form fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px 8px; margin: 0; min-width: 0; }
+.cal-form fieldset:disabled { opacity: .5; }
+.cal-form legend { font-size: 11.5px; font-weight: 600; color: var(--ink-2); padding: 0 4px; }
+.checks { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.checks small { color: var(--ink-3); }
+.cal-read { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; background: var(--panel-2); border-radius: 8px; padding: 10px; }
+.cal-read span { display: flex; flex-direction: column; font-size: 11.5px; color: var(--ink-3); }
+.cal-read b { font-family: var(--num); font-size: 16px; color: var(--ink); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.bulk { border-top: 1px solid var(--line-2); padding-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+.bulk[open] > * + * { margin-top: 10px; }
+.bulk summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--brand); }
+.slot { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.slot small { color: var(--ink-3); font-size: 11.5px; }
+.hints { display: flex; flex-wrap: wrap; gap: 6px; }
+.hints .chip { font-weight: 500; }
+.evid { font-size: 12.5px; color: var(--ink-2); background: var(--panel-2); border-radius: 8px; padding: 8px 10px; line-height: 1.45; }
+.lnk.dk { color: var(--ink); text-align: left; }
+.lnk.del { color: #c0392b; margin-left: 10px; }
+.t small.sub.warn { color: #9a6200; }
+.het .ctl.alvo { width: 220px; }
+.het .ctl.obs { min-width: 150px; width: 100%; }
+.het .ctl.dt { width: 136px; height: 30px; }
+.het .ctl.num { width: 70px; text-align: right; height: 30px; }
+.het td.acts { white-space: nowrap; }
+.pf .meta { flex: 1 1 260px; }
+.ctl.wide { width: 100%; min-width: 200px; }
+.t .ctl.num { width: 82px; text-align: right; }

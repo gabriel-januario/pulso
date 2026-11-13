@@ -65,7 +65,9 @@ O roteamento por `#` funciona em qualquer hospedagem estática, sem configuraç�
 ## D7 · Decisões do usuário separadas dos dados
 
 **Decisão:** o que a supervisão registra pelas telas (paradas no quadro, confirmação ou descarte de paradas
-prováveis, horas previstas e entrega dos pedidos) é configuração, não apontamento. Fica num objeto de configuração salvo no navegador
+prováveis, horas previstas e entrega dos pedidos, calendário, escala, exceções, HE programada, metas e motivos) é
+configuração, não apontamento. Só o que foi alterado é gravado; a tela de Configurações exporta e importa esse
+conjunto em JSON. Fica num objeto de configuração salvo no navegador
 (`src/app/config.ts`) e é aplicado ao motor com `engine.setConfig`.
 
 **Por quê:** o banco continua sendo o retrato fiel do que veio do ERP; as decisões humanas ficam rastreáveis e
@@ -97,4 +99,5 @@ em [`db/schema.sql`](../db/schema.sql).
 | `tests/views.test.ts` | baixo desempenho, pedidos, OPs e análise mensal iguais à v2.2 |
 | `tests/losses.test.ts` | manutenção e improdutivos iguais à v2.2 em dois períodos; efeito do quadro de paradas e da confirmação |
 | `tests/management.test.ts` | carteira (situação e término de cada PV), carga das 8 semanas, simulador, operadores e qualidade iguais à v2.2 |
+| `tests/planning.test.ts` | capacidade de cada recurso e dia do mês, HE realizada e programada, sugestão de titular, cópia de mês iguais à v2.2 |
 | `tests/db.test.ts` | integridade referencial do banco, consultas SQL e carteira de demonstração |

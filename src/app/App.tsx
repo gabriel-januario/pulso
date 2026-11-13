@@ -20,6 +20,9 @@ import { Operators } from './views/Operators';
 import { Portfolio } from './views/Portfolio';
 import { Quality } from './views/Quality';
 import { Simulator } from './views/Simulator';
+import { Calendar } from './views/Calendar';
+import { Overtime } from './views/Overtime';
+import { Settings } from './views/Settings';
 
 export function App() {
   const state = usePulso();
@@ -41,6 +44,9 @@ const VIEWS: Record<string, { title: string; render: (p: ViewProps) => React.Rea
   simulador: { title: 'Simulador', render: Simulator },
   operadores: { title: 'Operadores', render: Operators },
   qualidade: { title: 'Qualidade dos dados', render: Quality },
+  'horas-extras': { title: 'Horas extras', render: Overtime, ownFilters: true },
+  calendario: { title: 'Calendário fabril', render: Calendar, ownFilters: true },
+  configuracoes: { title: 'Configurações', render: Settings, ownFilters: true },
 };
 const routeOf = () => { const id = location.hash.replace(/^#\/?/, '').split('?')[0]; return VIEWS[id] ? id : 'geral'; };
 

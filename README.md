@@ -4,7 +4,7 @@
 
 **Utilização, capacidade e perdas de um parque de usinagem, calculadas a partir dos apontamentos do ERP.**
 
-React · TypeScript · SQLite no navegador · 59 testes automatizados · dados 100% fictícios
+React · TypeScript · SQLite no navegador · 68 testes automatizados · dados 100% fictícios
 
 </div>
 
@@ -47,6 +47,9 @@ hora de capacidade; quais motivos concentram as perdas; e quais máquinas puxam 
 | **Simulador** | Quanto a utilização sobe se reduzirmos uma perda, ou se abrirmos um turno em algumas máquinas? |
 | **Operadores** | Como cada pessoa aponta? Onde há registros esquecidos abertos ou sobrepostos? |
 | **Qualidade dos dados** | Dá para confiar nos números deste período? Onde o registro tem lacunas? |
+| **Horas extras** | Quanta HE foi realizada, em quais recursos? O que está programado para o mês? |
+| **Calendário fabril** | Quais dias e turnos contam como capacidade? Quem cobre cada recurso no mês? Que exceções aconteceram? |
+| **Configurações** | Metas, regras de manutenção, cadastro de máquinas, motivos de parada e backup da configuração |
 
 Os filtros ficam na URL (`#/painel?p=2026-10&g=Mandrilhadoras&m=MHMC`): um recorte pode ser enviado por link.
 
@@ -97,8 +100,9 @@ npm test
  ✓ tests/views.test.ts      baixo desempenho, pedidos, OPs e análise mensal idênticos à v2.2
  ✓ tests/losses.test.ts     manutenção (MTTR, MTBF, paradas a confirmar) e improdutivos idênticos à v2.2
  ✓ tests/management.test.ts carteira, carga semanal, simulador, operadores e qualidade idênticos à v2.2
+ ✓ tests/planning.test.ts   capacidade do mês, HE realizada e programada, cópia de mês e escala idênticas à v2.2
  ✓ tests/db.test.ts         integridade referencial, consultas SQL e carteira de demonstração
- Tests  59 passed
+ Tests  68 passed
 ```
 
 Além da paridade, há testes de invariantes de negócio: o destino da capacidade soma exatamente a capacidade;
@@ -129,7 +133,7 @@ Requer Node 22 ou mais recente.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 59 testes
+npm test           # 68 testes
 npm run build      # gera dist/ (site estático)
 ```
 
@@ -154,7 +158,7 @@ legacy/          PULSO v2.2, referência até o fim da migração
 - [x] Visão geral · Painel BI · Análise mensal · Máquinas · Grupos · Linha do tempo
 - [x] Manutenção (com quadro de máquinas paradas) e Improdutivas
 - [x] Carteira e prazos · Simulador de capacidade · Operadores · Qualidade dos dados
-- [ ] Horas extras · Calendário fabril · Configurações
+- [x] Horas extras · Calendário fabril · Configurações
 - [ ] Relatórios em PDF e Excel
 - [ ] Conversão do núcleo do motor (`src/engine/core.js`) para TypeScript estrito
 

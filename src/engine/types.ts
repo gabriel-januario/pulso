@@ -72,6 +72,8 @@ export interface Totals extends Measures {
 export interface DayTotals extends Measures {
   d: string;
   capP: number;
+  /** HE inferida do histórico no dia (min) */
+  heHist: number;
 }
 
 /** Um apontamento de produção em uma máquina de usinagem. Tempos em minutos absolutos. */
@@ -91,6 +93,8 @@ export interface ProdRecord {
   /** pedido: item e origem do apontamento */
   item: number;
   org: string;
+  /** matrícula (chapa) do operador; 0 quando não informada */
+  chapa: number;
 }
 
 /** Um apontamento de parada. `mach` é a máquina (direta ou inferida pelo operador); `mp` são os minutos dentro do período. */
@@ -122,6 +126,17 @@ export interface MachineEvent { e: MaintenanceEvent; real: number; ap: number; o
  * enquanto o operador foi apontar em outra máquina.
  */
 export interface SuspectStop { rc: string; t0: number; end: number; s: StopRecord; idle: number; mv: ProdRecord; key: string; open: boolean }
+
+export type DayType = 'util' | 'folga' | 'fer' | 'manut' | 'extra';
+export interface DayConfig { t: DayType; sh: string[] }
+export type RosterMode = 'fixo' | 'compartilhado' | 'eventual' | 'sem_turno' | 'inativo' | 'pendente';
+/** escala do mês: modo, turnos cobertos (com a chapa do titular, opcional), carga programada e criticidade */
+export interface RosterEntry { modo: RosterMode; turnos: Record<string, string>; obs: string; crit?: boolean; carga?: number | null }
+export type ExceptionType = 'troca' | 'operador' | 'quebra' | 'carga' | 'apoio';
+export interface CalendarException { id: string; tipo: ExceptionType; rc: string; dst?: string; sh: string; ini?: string; fim?: string; coberta?: boolean; obs?: string }
+/** hora extra por período: sem = h no período (seg–sex), sab/dom = h em cada sábado/domingo; alvo 'all', 'g:grupo' ou 'm:recurso' */
+export interface OvertimeEntry { id: string; ini: string; fim: string; wk?: string; alvo: string; sem: number; sab: number; dom: number; obs?: string }
+export interface MachineMonthConfig { on: boolean; sh: string[]; disp: number; grp: string; modo: RosterMode; src: string }
 
 export interface CartEntry { h?: number; due?: string; done?: boolean; hide?: boolean; g?: string }
 
@@ -197,6 +212,9 @@ export interface EngineDataset {
   /** todos os apontamentos de produção da base e os mesmos agrupados por operador (ordenados por início) */
   prod: ProdRecord[];
   byOp: Record<string, ProdRecord[]>;
+  byRc: Record<string, ProdRecord[]>;
+  /** paradas ligadas à usinagem (diretas na máquina ou inferidas pelo operador) */
+  stops: StopRecord[];
   meta: RawDataset['meta'];
 }
 
@@ -211,6 +229,21 @@ export interface EngineConfig {
   cart: Record<string, CartEntry>;
   evt: Record<string, 'm' | 'x'>;
   man: { maxDias: number; suspH: number };
+  /** calendário: tipo de dia e turnos previstos, só nas datas alteradas */
+  cal: Record<string, DayConfig>;
+  /** escala validada por mês e recurso */
+  escala: Record<string, Record<string, RosterEntry>>;
+  /** exceções confirmadas por data */
+  ex: Record<string, CalendarException[]>;
+  /** horas extras programadas */
+  he: OvertimeEntry[];
+  /** meses em que a HE inferida do histórico está desligada */
+  heOff: string[];
+  /** cadastro da máquina: grupo e disponibilidade (%) */
+  mach: Record<string, { grp?: string; disp?: number; [k: string]: unknown }>;
+  machM: Record<string, Record<string, string[]>>;
+  /** 'dados' = capacidade até o último apontamento; 'dia' = dia inteiro */
+  corte: 'dados' | 'dia';
   [key: string]: unknown;
 }
 
@@ -227,12 +260,23 @@ export interface Engine {
   capSeg(rc: string, a: number, b: number): number;
   /** capacidade do dia: n = turnos, he = hora extra, op = operacional (min) */
   capParts(rc: string, iso: string, noCut?: boolean): { n: number; he: number; op: number };
+  /** tipo de dia e turnos previstos (calendário alterado, feriado ou padrão da semana) */
+  dayCfg(iso: string): DayConfig;
+  /** cadastro da máquina (grupo, disponibilidade e turnos sugeridos) */
+  machCfg(rc: string): { on: boolean; sh: string[]; disp: number; grp: string; src: string };
+  /** cadastro efetivo da máquina no mês (escala validada + grupo e disponibilidade) */
+  machCfgM(rc: string, ym: string): MachineMonthConfig;
+  /** escala do recurso no mês (validada, de demonstração ou nula = a validar) */
+  rosterEntry(rc: string, ym: string): RosterEntry | null;
+  rosterModes(ym: string): { valid: number; pending: number };
+  /** minutos de HE do recurso no dia; `only` restringe a um lançamento (mesmo objeto de config.he) */
+  heDay(rc: string, iso: string, only?: OvertimeEntry | null, specific?: boolean): number;
   /** janelas de capacidade do dia produtivo p (serial) */
   dayWins(rc: string, p: number): CapacityWindow[];
   /** fim da base em minutos absolutos (a capacidade não é contada depois disso) */
   readonly cutT: number;
   motName(code: number | string): string;
   motCat(code: number | string): string;
-  constants: { DAY0: number; GRP_ORDER: string[]; MES: string[]; WD: string[]; CATS: [string, string][]; HOL: Record<string, string>; [key: string]: unknown };
+  constants: { DAY0: number; GRP_ORDER: string[]; MES: string[]; WD: string[]; CATS: [string, string][]; HOL: Record<string, string>; FACULT: Record<string, string>; ROSTER_MODES: Record<RosterMode, string>; EX_TYPES: Record<ExceptionType, string>; [key: string]: unknown };
   util: { s2iso(serial: number): string; iso2s(iso: string): number; title(s: string): string; shortNm(s: string): string; hhmm(t: number): string; fmtDT(t: number): string };
 }

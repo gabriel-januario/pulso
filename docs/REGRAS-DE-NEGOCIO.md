@@ -159,3 +159,29 @@ registro, não o desempenho da pessoa.
 
 Notas: A ≥ 90 · B 80–89 · C 70–79 · D 60–69 · E < 60. Abaixo de B, as outras telas devem ser lidas com cautela.
 
+## 14. Calendário, escala e exceções
+
+- **Tipo de dia.** Sem alteração, segunda a sexta é dia útil com os turnos marcados como padrão; sábado, domingo e
+  feriados (nacionais, estaduais de SP e o aniversário do município) são folga ou feriado. O calendário permite
+  mudar qualquer data, um intervalo ou todos os sábados, por exemplo.
+- **Escala do mês.** Cada recurso precisa de uma escala validada: *fixo* ou *compartilhado* (geram capacidade nos
+  turnos marcados), *eventual*, *sem turno* ou *inativo* (não geram). Recurso sem escala fica *a validar* e sem
+  capacidade fixa. A base de demonstração traz a escala de janeiro a outubro de 2026 pré-validada a partir dos
+  próprios apontamentos; os meses seguintes começam a partir de **Copiar mês**.
+- **Copiar mês** leva, para cada dia da semana, o tipo de dia e os turnos mais frequentes no mês de origem
+  (feriados continuam feriados), e a escala de cada recurso, mantendo a carga já informada no destino.
+- **Sugestão de titular.** Para cada turno, a tela sugere as duas chapas que mais apareceram no recurso no miolo do
+  turno (sem a primeira e a última hora), em dias úteis, com pelo menos 1 h no dia.
+- **Exceções** mudam a capacidade operacional, nunca a fixa: remanejamento sem substituto, falta de operador e
+  quebra tiram a janela do recurso de origem; remanejamento e cobertura eventual somam no destino; quebra também
+  abre uma parada de manutenção no período; *sem programação* marca a janela como sem carga.
+
+## 15. Horas extras
+
+- **Programada:** por período e alvo (todas as máquinas, um grupo ou uma máquina). As horas de segunda a sexta são do
+  período inteiro, divididas pelos dias úteis; sábado e domingo são horas em cada dia. Na capacidade, a janela de
+  HE começa no fim do último turno do dia e respeita a disponibilidade da máquina.
+- **Realizada:** produção dentro das janelas de HE. Até outubro de 2026, quando não havia lançamento, a HE é
+  inferida do histórico: a produção além da jornada líquida do dia. A inferência pode ser desligada por mês, e
+  um lançamento manual para o recurso e o dia sempre substitui a estimativa.
+
