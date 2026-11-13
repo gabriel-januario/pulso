@@ -15,8 +15,7 @@ teste e dados presos dentro do código. A versão 3 resolve os três sem mudar n
 **Alternativas:** (a) JSON embutido, como na v2.2; (b) PostgreSQL com uma API.
 
 **Por quê:** o SQLite me dá um modelo relacional de verdade (chaves estrangeiras, visões, SQL) sem exigir servidor.
-A demo pode ficar em hospedagem estática, sempre no ar e sem custo — o que importa para um portfólio. O caminho para
-um servidor continua aberto: o motor recebe uma base em memória e não sabe de onde ela veio.
+A demo pode ficar em hospedagem estática, sempre no ar.
 
 **Custo:** o navegador baixa o banco inteiro (≈ 4 MB; menos de 1 MB com a compressão do servidor) e o WebAssembly do sql.js (≈ 340 kB compactado).
 Para a escala de uma fábrica (dezenas de milhares de apontamentos por ano), é aceitável.
