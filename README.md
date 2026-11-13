@@ -2,7 +2,7 @@
 
 # PULSO™ — Performance da Produção
 
-**Utilização, capacidade e perdas de um parque de usinagem, calculadas a partir dos apontamentos do ERP.**
+**Utilização, capacidade e perdas de um parque fabril, calculadas a partir dos apontamentos do ERP.**
 
 **[Abrir a demonstração →](https://gabriel-januario.github.io/pulso/)**
 
