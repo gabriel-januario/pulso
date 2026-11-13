@@ -123,6 +123,8 @@ export interface MachineEvent { e: MaintenanceEvent; real: number; ap: number; o
  */
 export interface SuspectStop { rc: string; t0: number; end: number; s: StopRecord; idle: number; mv: ProdRecord; key: string; open: boolean }
 
+export interface CartEntry { h?: number; due?: string; done?: boolean; hide?: boolean; g?: string }
+
 /** Parada registrada manualmente no quadro de máquinas paradas (datas em AAAA-MM-DDTHH:MM). */
 export interface ManualStop { id: string; rc: string; ini: string; fim: string | null; tipo: string; obs: string }
 
@@ -148,6 +150,10 @@ export interface MachineAgg extends Measures {
   down: boolean;
   heHist: number;
   operCap: number;
+  conflict: number;
+  manual: number;
+  /** apontamentos com mais de 10 h */
+  long: ProdRecord[];
   /** manutenção oculta (tempo parado real além do apontado) */
   ocult: number;
 }
@@ -188,6 +194,9 @@ export interface EngineDataset {
   maxPd: number;
   nAll: number;
   lastT: number;
+  /** todos os apontamentos de produção da base e os mesmos agrupados por operador (ordenados por início) */
+  prod: ProdRecord[];
+  byOp: Record<string, ProdRecord[]>;
   meta: RawDataset['meta'];
 }
 
@@ -198,6 +207,8 @@ export interface EngineConfig {
   motivos: Record<string, { n: string; c: string }>;
   /** quadro de paradas e decisões sobre paradas a confirmar ('m' = manutenção, 'x' = descartada) */
   paradas: ManualStop[];
+  /** carteira: previsão por PV (horas previstas, entrega, concluído, oculto, grupo para PV sem apontamento) */
+  cart: Record<string, CartEntry>;
   evt: Record<string, 'm' | 'x'>;
   man: { maxDias: number; suspH: number };
   [key: string]: unknown;
@@ -214,12 +225,14 @@ export interface Engine {
   buildEvents(): { ev: (MaintenanceEvent & { realAll: number; p?: ManualStop })[]; sus: SuspectStop[] };
   /** capacidade (min) da máquina dentro do intervalo absoluto [a, b) */
   capSeg(rc: string, a: number, b: number): number;
+  /** capacidade do dia: n = turnos, he = hora extra, op = operacional (min) */
+  capParts(rc: string, iso: string, noCut?: boolean): { n: number; he: number; op: number };
   /** janelas de capacidade do dia produtivo p (serial) */
   dayWins(rc: string, p: number): CapacityWindow[];
   /** fim da base em minutos absolutos (a capacidade não é contada depois disso) */
   readonly cutT: number;
   motName(code: number | string): string;
   motCat(code: number | string): string;
-  constants: { DAY0: number; GRP_ORDER: string[]; MES: string[]; WD: string[]; CATS: [string, string][]; [key: string]: unknown };
+  constants: { DAY0: number; GRP_ORDER: string[]; MES: string[]; WD: string[]; CATS: [string, string][]; HOL: Record<string, string>; [key: string]: unknown };
   util: { s2iso(serial: number): string; iso2s(iso: string): number; title(s: string): string; shortNm(s: string): string; hhmm(t: number): string; fmtDT(t: number): string };
 }

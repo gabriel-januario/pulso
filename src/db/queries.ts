@@ -1,3 +1,4 @@
+import type { CartEntry } from '../engine';
 import type { Database } from 'sql.js';
 import { query } from './client';
 
@@ -37,4 +38,13 @@ export function horasPorFamilia(db: Database, from: string, to: string): HorasFa
       ORDER BY SUM(a.duracao_min) DESC`,
     [from, to],
   );
+}
+
+/** Carteira de demonstração gravada na base (horas previstas e entrega por PV). As edições do usuário ficam por cima. */
+export function carteiraDemo(db: Database): Record<string, CartEntry> {
+  const out: Record<string, CartEntry> = {};
+  for (const r of query<{ pv_numero: number; horas_previstas: number; entrega: string; grupo: string | null }>(db, 'SELECT pv_numero, horas_previstas, entrega, grupo FROM carteira_pv ORDER BY pv_numero')) {
+    out[String(r.pv_numero)] = { h: r.horas_previstas, due: r.entrega, ...(r.grupo ? { g: r.grupo } : {}) };
+  }
+  return out;
 }

@@ -111,3 +111,51 @@ máquinas com problema.
 O Painel BI compara cada indicador com o período anterior: o mês anterior completo, quando o período é um mês
 fechado; senão, uma janela do mesmo tamanho imediatamente antes. Utilização e disponibilidade variam em pontos
 percentuais; horas, em %.
+
+## 10. Carteira e prazos
+
+Entram na carteira os pedidos (PV) com usinagem nos últimos 30 dias da base e os que o usuário cadastrou.
+
+- **Ritmo** = horas usinadas no PV nos últimos 14 dias ÷ 14. É o ritmo real, não o planejado.
+- **Término previsto**: o restante (`horas previstas − usinado`) é consumido no ritmo, só em dias úteis
+  (segunda a sexta, fora dos feriados). Como o ritmo é por dia corrido, cada dia útil consome `ritmo × 7 ÷ 5`.
+- **Situação**, nesta ordem: *concluído* (marcado ou usinado ≥ previsto) · *atrasado* (entrega já passou) ·
+  *sem ritmo* (nada usinado em 14 dias) · *em risco* (término previsto depois da entrega) · *no prazo*.
+  Sem horas ou sem entrega, o PV fica *sem previsão*.
+- **Carga semanal**: o restante de cada PV é distribuído por igual nos dias úteis até a entrega (PV atrasado cai
+  todo na primeira semana), repartido entre os grupos de máquinas na proporção das horas já usinadas. A capacidade
+  usa a escala validada; onde não há escala, a média do mesmo dia da semana nas últimas 4 semanas.
+
+## 11. Simulador
+
+Responde "quanto ganharíamos se…" sem prometer mais do que os dados sustentam:
+
+- reduzir X% de uma categoria de improdutivo devolve X% das horas dessa categoria **na conta da máquina**
+  (a mesma régua do destino da capacidade, sem contar duas vezes paradas sobrepostas);
+- reduzir manutenção e capacidade sem apontamento funciona igual, sobre essas parcelas;
+- um turno extra soma `horas do turno × dias úteis` à capacidade das máquinas escolhidas e produz na utilização
+  atual de cada uma (60% da meta, se a máquina não tem histórico no período).
+
+O resultado mostra a utilização antes e depois, o ganho em horas e a equivalência em dias de produção média.
+
+## 12. Índice de apontamento por operador
+
+Quatro pilares de 25%, de 0 a 100: motivos de improdutivo classificados; horas fora de apontamentos com mais de
+10 h; ausência de sobreposição (dois registros do mesmo operador ao mesmo tempo, com 5 min de tolerância; os minutos
+sobrepostos pesam três vezes); apontamentos feitos pelo coletor, não lançados à mão. O índice mede a qualidade do
+registro, não o desempenho da pessoa.
+
+## 13. Qualidade dos dados
+
+Índice de 0 a 100 por máquina, consolidado pela capacidade de cada uma e acompanhado semana a semana:
+
+| Pilar | Peso | Mede |
+|---|---|---|
+| Cobertura | 40% | capacidade com algum apontamento (produção ou parada) |
+| Classificação | 20% | improdutivo com categoria de motivo |
+| Sem excesso | 15% | produção fora de apontamentos com mais de 10 h |
+| Sem conflito | 15% | produção que não se sobrepõe a uma parada na mesma máquina |
+| Via coletor | 10% | apontamentos não lançados à mão |
+
+Notas: A ≥ 90 · B 80–89 · C 70–79 · D 60–69 · E < 60. Abaixo de B, as outras telas devem ser lidas com cautela.
+

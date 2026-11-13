@@ -4,7 +4,7 @@
 
 **Utilização, capacidade e perdas de um parque de usinagem, calculadas a partir dos apontamentos do ERP.**
 
-React · TypeScript · SQLite no navegador · 52 testes automatizados · dados 100% fictícios
+React · TypeScript · SQLite no navegador · 59 testes automatizados · dados 100% fictícios
 
 </div>
 
@@ -43,6 +43,10 @@ hora de capacidade; quais motivos concentram as perdas; e quais máquinas puxam 
 | **Linha do tempo** | Quem estava produzindo o quê, a cada hora? Quais pedidos consumiram mais máquina? |
 | **Manutenção** | Qual é a disponibilidade real? Quanto da parada não foi apontado? Quais máquinas estão paradas agora? |
 | **Improdutivas** | Quais motivos concentram as perdas? Quais máquinas e operadores são mais afetados? |
+| **Carteira e prazos** | Quais pedidos vão atrasar no ritmo atual? Qual grupo de máquinas fica sobrecarregado nas próximas semanas? |
+| **Simulador** | Quanto a utilização sobe se reduzirmos uma perda, ou se abrirmos um turno em algumas máquinas? |
+| **Operadores** | Como cada pessoa aponta? Onde há registros esquecidos abertos ou sobrepostos? |
+| **Qualidade dos dados** | Dá para confiar nos números deste período? Onde o registro tem lacunas? |
 
 Os filtros ficam na URL (`#/painel?p=2026-10&g=Mandrilhadoras&m=MHMC`): um recorte pode ser enviado por link.
 
@@ -92,8 +96,9 @@ npm test
  ✓ tests/dashboard.test.ts  filtro cruzado e período de comparação idênticos à v2.2; regras dos visuais
  ✓ tests/views.test.ts      baixo desempenho, pedidos, OPs e análise mensal idênticos à v2.2
  ✓ tests/losses.test.ts     manutenção (MTTR, MTBF, paradas a confirmar) e improdutivos idênticos à v2.2
- ✓ tests/db.test.ts         integridade referencial e consultas SQL
- Tests  52 passed
+ ✓ tests/management.test.ts carteira, carga semanal, simulador, operadores e qualidade idênticos à v2.2
+ ✓ tests/db.test.ts         integridade referencial, consultas SQL e carteira de demonstração
+ Tests  59 passed
 ```
 
 Além da paridade, há testes de invariantes de negócio: o destino da capacidade soma exatamente a capacidade;
@@ -124,7 +129,7 @@ Requer Node 22 ou mais recente.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 52 testes
+npm test           # 59 testes
 npm run build      # gera dist/ (site estático)
 ```
 
@@ -148,7 +153,7 @@ legacy/          PULSO v2.2, referência até o fim da migração
 - [x] Motor de indicadores isolado e testado contra a v2.2
 - [x] Visão geral · Painel BI · Análise mensal · Máquinas · Grupos · Linha do tempo
 - [x] Manutenção (com quadro de máquinas paradas) e Improdutivas
-- [ ] Carteira e prazos · Simulador de capacidade · Operadores · Qualidade dos dados
+- [x] Carteira e prazos · Simulador de capacidade · Operadores · Qualidade dos dados
 - [ ] Horas extras · Calendário fabril · Configurações
 - [ ] Relatórios em PDF e Excel
 - [ ] Conversão do núcleo do motor (`src/engine/core.js`) para TypeScript estrito
@@ -158,6 +163,8 @@ legacy/          PULSO v2.2, referência até o fim da migração
 Todos os dados são fictícios. A base foi derivada de uma exportação real e transformada: nomes de operadores e
 logins inventados; chapas, OPs, pedidos e centros de custo renumerados; horários e durações alterados. Os
 modelos de máquina são nomes de fabricantes de mercado. A "Metalúrgica Horizonte S.A." não existe.
+A previsão da carteira (horas previstas e entrega de cada pedido, tabela `carteira_pv`) também é fictícia: foi
+gerada a partir das horas apontadas para que a tela mostre pedidos em todas as situações.
 
 ---
 

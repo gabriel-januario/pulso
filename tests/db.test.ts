@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from 'sql.js';
 import { query } from '../src/db/client';
-import { horasPorFamilia, paradasPorMotivo } from '../src/db/queries';
+import { carteiraDemo, horasPorFamilia, paradasPorMotivo } from '../src/db/queries';
 import { openTestDb } from './helpers';
 
 let db: Database;
@@ -27,5 +27,15 @@ describe('banco de dados', () => {
 
   it('horas por família cobre as sete famílias de máquinas', () => {
     expect(horasPorFamilia(db, '2026-01-01', '2026-12-31').map((r) => r.familia)).toContain('Mandrilhadoras');
+  });
+
+  it('carteira de demonstração tem previsão válida e PVs que existem nos apontamentos', () => {
+    const c = carteiraDemo(db);
+    const keys = Object.keys(c);
+    expect(keys.length).toBeGreaterThan(20);
+    for (const k of keys) { expect(c[k].h).toBeGreaterThan(0); expect(c[k].due).toMatch(/^\d{4}-\d{2}-\d{2}$/); }
+    const sem = keys.filter((k) => c[k].g);
+    const [{ n }] = query<{ n: number }>(db, `SELECT COUNT(DISTINCT pv_numero) AS n FROM apontamento WHERE pv_numero IN (${keys.filter((k) => !c[k].g).join(',')})`);
+    expect(n).toBe(keys.length - sem.length);
   });
 });

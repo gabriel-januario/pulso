@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { monthOptions } from '../analytics/period';
 import { SECTIONS, Sidebar } from './components/Sidebar';
+import { carteiraDemo } from '../db/queries';
 import { useConfig } from './config';
 import { useFilters } from './filters';
 import { dmy, int } from './format';
@@ -15,6 +16,10 @@ import { Overview } from './views/Overview';
 import type { ViewProps } from './views/types';
 import { Unproductive } from './views/Unproductive';
 import { Timeline } from './views/Timeline';
+import { Operators } from './views/Operators';
+import { Portfolio } from './views/Portfolio';
+import { Quality } from './views/Quality';
+import { Simulator } from './views/Simulator';
 
 export function App() {
   const state = usePulso();
@@ -32,6 +37,10 @@ const VIEWS: Record<string, { title: string; render: (p: ViewProps) => React.Rea
   linha: { title: 'Linha do tempo', render: Timeline },
   manutencao: { title: 'Manutenção', render: Maintenance },
   improdutivas: { title: 'Improdutivas', render: Unproductive },
+  carteira: { title: 'Carteira e prazos', render: Portfolio, ownFilters: true },
+  simulador: { title: 'Simulador', render: Simulator },
+  operadores: { title: 'Operadores', render: Operators },
+  qualidade: { title: 'Qualidade dos dados', render: Quality },
 };
 const routeOf = () => { const id = location.hash.replace(/^#\/?/, '').split('?')[0]; return VIEWS[id] ? id : 'geral'; };
 
@@ -41,7 +50,8 @@ function Shell({ pulso }: { pulso: Pulso }) {
   const all = useMemo(() => ({ from: engine.util.s2iso(engine.dataset.minPd), to: engine.util.s2iso(engine.dataset.maxPd) }), [engine]);
   const [view, setView] = useState(routeOf);
   const filters = useFilters(months, all, view);
-  const config = useConfig(engine);
+  const defaults = useMemo(() => ({ cart: carteiraDemo(pulso.db) }), [pulso.db]);
+  const config = useConfig(engine, defaults);
   useEffect(() => {
     const on = () => setView(routeOf());
     addEventListener('hashchange', on);

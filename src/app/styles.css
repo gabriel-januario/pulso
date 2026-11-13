@@ -352,3 +352,86 @@ p.meta { margin: 0 0 8px; }
 .tag.imp { background: #fdeee6; color: #9a3a12; border-color: #f6cdb8; }
 @media (max-width: 860px) { .form { grid-template-columns: minmax(0, 1fr); } .form label:nth-child(5) { grid-column: auto; } }
 .t td.n.code:first-child { min-width: 0; width: 34px; }
+
+/* ===== Gestão: carteira, simulador, operadores, qualidade ===== */
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; flex: none; }
+.t small.sub { display: block; font-size: 11px; color: var(--ink-3); font-weight: 500; white-space: nowrap; }
+.t .n small.sub { text-align: right; }
+.st { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 10px; padding: 1px 8px; white-space: nowrap; border: 1px solid transparent; }
+.st.crit { background: #fdecea; color: #b42318; border-color: #f6c9c4; }
+.st.warn { background: #fff4e0; color: #8a5800; border-color: #f3dbab; }
+.st.good { background: var(--good-bg); color: var(--good); border-color: #b7dfc5; }
+.st.done { background: #eef2f6; color: #52657a; border-color: var(--line); }
+.st.none { background: #fff; color: var(--ink-3); border-color: var(--line); }
+.t td.wn { color: #9a6200; font-weight: 600; } .t td.cr { color: #c0392b; font-weight: 600; }
+.t tr.dim td { color: var(--ink-3); }
+.gr { display: inline-block; min-width: 46px; text-align: center; color: #fff; font-size: 11.5px; font-weight: 700; border-radius: 10px; padding: 1px 7px; }
+.pf { padding: 10px 18px 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.note { font-size: 13px; color: var(--ink-2); background: #eaf2fd; border: 1px solid #bcd3f2; border-radius: 8px; padding: 8px 12px; }
+.lnk { border: 0; background: none; color: var(--brand); font-size: 12px; cursor: pointer; padding: 0; }
+.lnk:hover { text-decoration: underline; }
+
+.ldt th small { display: block; font-weight: 500; text-transform: none; letter-spacing: 0; }
+.ldt td.ld { min-width: 86px; }
+.ldt td small { display: block; font-size: 10.5px; color: var(--ink-3); }
+.ldt td.ld.ok b { color: var(--good); } .ldt td.ld.hi { background: #fff8eb; } .ldt td.ld.hi b { color: #9a6200; }
+.ldt td.ld.over { background: #fdecea; } .ldt td.ld.over b { color: #b42318; }
+.ldt td:first-child { white-space: nowrap; }
+
+.pvt td:first-child { min-width: 92px; }
+.pvt td.gs span { display: block; white-space: nowrap; font-size: 12.5px; }
+.pvt td.gs small { color: var(--ink-3); }
+.pvt .prog { display: block; height: 4px; border-radius: 2px; background: var(--line-2); margin-top: 4px; overflow: hidden; }
+.pvt .prog b { display: block; height: 100%; background: var(--brand); }
+.pvt .ctl.num { width: 82px; text-align: right; height: 30px; }
+.pvt .ctl.dt { width: 136px; height: 30px; }
+.pvt .ctl.dt.late { border-color: #f1c4c0; color: #b42318; }
+.pvt td.acts { white-space: nowrap; }
+.pvt .ck { font-size: 12px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; }
+.form.f4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.form.f4 label:nth-child(5) { grid-column: auto; }
+.form.f4 .btn { justify-self: start; }
+@media (min-width: 1500px) { .form.f4 { grid-template-columns: .8fr 1.4fr .8fr 1fr auto; } }
+.paste { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.paste textarea { width: 100%; height: auto; padding: 8px 10px; font-family: ui-monospace, monospace; font-size: 12.5px; resize: vertical; }
+
+.sim h3, .det3 h3 { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); margin: 14px 0 6px; display: flex; align-items: center; gap: 8px; }
+.sim h3:first-child, .det3 > div > h3:first-child { margin-top: 0; }
+.sl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(90px, 1.1fr) 42px; align-items: center; gap: 10px; font-size: 13px; padding: 3px 0; }
+.sl span { min-width: 0; overflow-wrap: anywhere; }
+.sl input { width: 100%; accent-color: var(--brand); }
+.sl b { text-align: right; font-variant-numeric: tabular-nums; }
+.sim .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.sim .row .ctl { flex: 1 1 160px; }
+.mgrp { margin: 8px 0; }
+.mgrp > small { display: flex; align-items: center; font-size: 11.5px; color: var(--ink-2); font-weight: 600; margin-bottom: 4px; }
+.sim > .meta { margin-top: 12px; line-height: 1.45; }
+.chip[aria-pressed='false'] { font-weight: 500; }
+
+.expl { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.expl ul { padding-left: 18px; margin: 6px 0 12px; }
+.grades { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.grades span { color: #fff; font-weight: 700; font-size: 12px; border-radius: 10px; padding: 2px 9px; }
+.grades small { font-weight: 500; opacity: .9; }
+.t th button.srt { all: unset; cursor: pointer; white-space: nowrap; }
+.t th button.srt:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.opt td:first-child { min-width: 150px; }
+.ph .btn { margin-left: auto; height: 30px; }
+.det3 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 20px; }
+@media (max-width: 1100px) { .det3 { grid-template-columns: minmax(0, 1fr); } }
+.dbars { display: flex; align-items: flex-end; gap: 2px; height: 110px; border-bottom: 1px solid var(--line); }
+.dbars span { flex: 1 1 0; min-width: 0; height: 100%; display: flex; align-items: flex-end; }
+.dbars b { display: block; width: 100%; background: var(--brand); border-radius: 2px 2px 0 0; min-height: 1px; }
+.dbl { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); margin-top: 4px; gap: 8px; }
+
+.gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.gauge { width: 100%; max-width: 280px; height: auto; }
+.gauge .gv { font-family: var(--num); font-size: 34px; font-weight: 700; fill: #1e2f40; }
+.gauge .gg { font-size: 13px; font-weight: 700; }
+.sls { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 32px; }
+.sls > div > h3 { margin-top: 0; }
+@media (max-width: 700px) { .sls > div + div > h3 { margin-top: 14px; } }
+.split { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); gap: 16px; align-items: start; }
+.split.rev { grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr); align-items: stretch; }
+@media (max-width: 1100px) { .split, .split.rev { grid-template-columns: minmax(0, 1fr); } }
+.pf .rst { margin-left: auto; }

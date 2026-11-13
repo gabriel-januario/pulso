@@ -86,6 +86,15 @@ CREATE INDEX ix_apont_op       ON apontamento(op_numero);
 -- ---------------------------------------------------------------------
 -- Visões de apoio
 -- ---------------------------------------------------------------------
+-- Carteira de demonstração: horas previstas e entrega de cada PV (fictícias, para a tela Carteira e prazos).
+-- PV sem apontamento informa o grupo de máquinas onde será usinado.
+CREATE TABLE carteira_pv (
+  pv_numero       INTEGER PRIMARY KEY,
+  horas_previstas REAL NOT NULL CHECK (horas_previstas > 0),
+  entrega         TEXT NOT NULL,
+  grupo           TEXT
+);
+
 CREATE VIEW vw_apontamento AS
 SELECT a.id, a.data, a.inicio, a.duracao_min, ROUND(a.duracao_min/60.0,2) AS horas,
        a.tipo, r.codigo AS recurso, r.nome AS recurso_nome, r.familia, r.cr, c.usinagem,
