@@ -74,6 +74,18 @@ conjunto em JSON. Fica num objeto de configuração salvo no navegador
 reversíveis, e o motor recalcula tudo a partir das duas fontes. Quando houver servidor, essa configuração é a
 primeira candidata a ir para uma tabela própria.
 
+## D8 · Relatórios: PDF pela impressão do navegador, Excel com fórmulas
+
+**Decisão:** o PDF é um documento React em formato A4, impresso pelo próprio navegador (`@page` com numeração de
+páginas e rodapé). O Excel é montado com `exceljs`, carregado só quando o usuário pede, e leva utilização, status,
+subtotais e total como **fórmulas**, não como valores.
+
+**Por quê:** a v2.2 gerava o PDF fotografando cada página (html2canvas + jsPDF): arquivo pesado e texto que não se
+seleciona nem se pesquisa. Imprimindo, o texto continua texto e os gráficos continuam vetoriais, sem dependência
+extra. No Excel, fórmula em vez de número fechado deixa quem recebe a planilha auditar a conta. O construtor da
+planilha recebe o módulo `exceljs` por parâmetro e é testado no Node: o teste gera o arquivo, relê e confere os
+totais contra o motor.
+
 ## Modelo de dados
 
 ```
@@ -100,4 +112,5 @@ em [`db/schema.sql`](../db/schema.sql).
 | `tests/losses.test.ts` | manutenção e improdutivos iguais à v2.2 em dois períodos; efeito do quadro de paradas e da confirmação |
 | `tests/management.test.ts` | carteira (situação e término de cada PV), carga das 8 semanas, simulador, operadores e qualidade iguais à v2.2 |
 | `tests/planning.test.ts` | capacidade de cada recurso e dia do mês, HE realizada e programada, sugestão de titular, cópia de mês iguais à v2.2 |
+| `tests/reports.test.ts` | a planilha Excel gerada fecha com o motor (capacidade, produção, dias, pareto) e usa fórmulas na utilização |
 | `tests/db.test.ts` | integridade referencial do banco, consultas SQL e carteira de demonstração |

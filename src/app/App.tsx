@@ -23,6 +23,7 @@ import { Simulator } from './views/Simulator';
 import { Calendar } from './views/Calendar';
 import { Overtime } from './views/Overtime';
 import { Settings } from './views/Settings';
+import { Reports } from './views/Reports';
 
 export function App() {
   const state = usePulso();
@@ -47,6 +48,7 @@ const VIEWS: Record<string, { title: string; render: (p: ViewProps) => React.Rea
   'horas-extras': { title: 'Horas extras', render: Overtime, ownFilters: true },
   calendario: { title: 'Calendário fabril', render: Calendar, ownFilters: true },
   configuracoes: { title: 'Configurações', render: Settings, ownFilters: true },
+  relatorios: { title: 'Relatórios', render: Reports },
 };
 const routeOf = () => { const id = location.hash.replace(/^#\/?/, '').split('?')[0]; return VIEWS[id] ? id : 'geral'; };
 
