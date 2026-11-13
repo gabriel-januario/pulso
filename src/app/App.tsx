@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState, type ComponentType } from 'react';
 import { monthOptions } from '../analytics/period';
 import { SECTIONS, Sidebar } from './components/Sidebar';
 import { carteiraDemo } from '../db/queries';
@@ -7,23 +7,26 @@ import { useFilters } from './filters';
 import { dmy, int } from './format';
 import { TooltipProvider } from './tooltip';
 import { usePulso, type Pulso } from './usePulso';
-import { Dashboard } from './views/Dashboard';
-import { Groups } from './views/Groups';
-import { Machines } from './views/Machines';
-import { Monthly } from './views/Monthly';
-import { Maintenance } from './views/Maintenance';
-import { Overview } from './views/Overview';
 import type { ViewProps } from './views/types';
-import { Unproductive } from './views/Unproductive';
-import { Timeline } from './views/Timeline';
-import { Operators } from './views/Operators';
-import { Portfolio } from './views/Portfolio';
-import { Quality } from './views/Quality';
-import { Simulator } from './views/Simulator';
-import { Calendar } from './views/Calendar';
-import { Overtime } from './views/Overtime';
-import { Settings } from './views/Settings';
-import { Reports } from './views/Reports';
+
+/* cada tela é um pedaço separado do bundle, baixado na primeira visita */
+const view = (load: () => Promise<Record<string, unknown>>, name: string) => lazy(async () => ({ default: (await load())[name] as ComponentType<ViewProps> }));
+const Dashboard = view(() => import('./views/Dashboard'), 'Dashboard');
+const Groups = view(() => import('./views/Groups'), 'Groups');
+const Machines = view(() => import('./views/Machines'), 'Machines');
+const Monthly = view(() => import('./views/Monthly'), 'Monthly');
+const Maintenance = view(() => import('./views/Maintenance'), 'Maintenance');
+const Overview = view(() => import('./views/Overview'), 'Overview');
+const Unproductive = view(() => import('./views/Unproductive'), 'Unproductive');
+const Timeline = view(() => import('./views/Timeline'), 'Timeline');
+const Operators = view(() => import('./views/Operators'), 'Operators');
+const Portfolio = view(() => import('./views/Portfolio'), 'Portfolio');
+const Quality = view(() => import('./views/Quality'), 'Quality');
+const Simulator = view(() => import('./views/Simulator'), 'Simulator');
+const Calendar = view(() => import('./views/Calendar'), 'Calendar');
+const Overtime = view(() => import('./views/Overtime'), 'Overtime');
+const Settings = view(() => import('./views/Settings'), 'Settings');
+const Reports = view(() => import('./views/Reports'), 'Reports');
 
 export function App() {
   const state = usePulso();
@@ -32,7 +35,7 @@ export function App() {
   return <TooltipProvider><Shell pulso={state.pulso} /></TooltipProvider>;
 }
 
-const VIEWS: Record<string, { title: string; render: (p: ViewProps) => React.ReactNode; ownFilters?: boolean }> = {
+const VIEWS: Record<string, { title: string; render: ComponentType<ViewProps>; ownFilters?: boolean }> = {
   geral: { title: 'Visão geral', render: Overview },
   painel: { title: 'Painel BI', render: Dashboard },
   mensal: { title: 'Análise mensal', render: Monthly, ownFilters: true },
@@ -94,7 +97,7 @@ function Shell({ pulso }: { pulso: Pulso }) {
           </div>}
         </header>
         <div className="view">
-          <V.render key={view} pulso={pulso} filters={filters} config={config} />
+          <Suspense fallback={<div className="loading" role="status">Carregando a tela…</div>}><V.render key={view} pulso={pulso} filters={filters} config={config} /></Suspense>
         </div>
       </main>
     </div>

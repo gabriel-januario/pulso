@@ -579,3 +579,4 @@ p.meta { margin: 0 0 8px; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 .report .rt td.nw { white-space: nowrap; }
+.loading { padding: 40px; text-align: center; color: var(--ink-3); font-size: 13px; }

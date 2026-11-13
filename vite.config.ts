@@ -5,5 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: './',
   plugins: [react()],
+  // o maior pedaço é o exceljs (~930 kB), baixado só quando alguém exporta Excel
+  build: { chunkSizeWarningLimit: 1000 },
   test: { include: ['tests/**/*.test.ts'], testTimeout: 60_000 },
 });

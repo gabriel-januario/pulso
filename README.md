@@ -8,6 +8,8 @@ React · TypeScript · SQLite no navegador · 78 testes automatizados · dados 1
 
 </div>
 
+![Visão geral do PULSO: utilização por dia, por grupo e destino da capacidade](docs/img/visao-geral.jpg)
+
 ---
 
 ## Por que eu construí o PULSO
@@ -54,6 +56,14 @@ hora de capacidade; quais motivos concentram as perdas; e quais máquinas puxam 
 
 Os filtros ficam na URL (`#/painel?p=2026-10&g=Mandrilhadoras&m=MHMC`): um recorte pode ser enviado por link.
 
+### Algumas telas
+
+| | |
+|---|---|
+| ![Painel BI](docs/img/painel-bi.jpg) **Painel BI**: filtro cruzado e comparação com o período anterior | ![Manutenção](docs/img/manutencao.jpg) **Manutenção**: tempo real parado, MTTR, MTBF e quadro de máquinas paradas |
+| ![Carteira e prazos](docs/img/carteira.jpg) **Carteira e prazos**: término previsto pelo ritmo real e carga das próximas semanas | ![Simulador](docs/img/simulador.jpg) **Simulador**: quanto a utilização sobe recuperando perdas ou abrindo um turno |
+| ![Calendário fabril](docs/img/calendario.jpg) **Calendário fabril**: dias, turnos, escala e exceções que definem a capacidade | ![Relatório em PDF](docs/img/relatorio-pdf.jpg) **Relatório em PDF**: A4, texto selecionável, mesmas contas das telas |
+
 ## Regras de negócio
 
 As definições abaixo são o coração do projeto. O detalhamento, com exemplos, está em
@@ -96,21 +106,25 @@ resultados da v2.2 e transformei em teste.
 
 ```
 npm test
- ✓ tests/engine.test.ts     paridade com a v2.2 em 5 recortes: totais, cada máquina, grupos, cada dia
- ✓ tests/dashboard.test.ts  filtro cruzado e período de comparação idênticos à v2.2; regras dos visuais
- ✓ tests/views.test.ts      baixo desempenho, pedidos, OPs e análise mensal idênticos à v2.2
- ✓ tests/losses.test.ts     manutenção (MTTR, MTBF, paradas a confirmar) e improdutivos idênticos à v2.2
- ✓ tests/management.test.ts carteira, carga semanal, simulador, operadores e qualidade idênticos à v2.2
- ✓ tests/reports.test.ts    o Excel gerado fecha com o motor: capacidade, produção, dias e pareto
- ✓ tests/planning.test.ts   capacidade do mês, HE realizada e programada, cópia de mês e escala idênticas à v2.2
+ ✓ tests/engine.test.ts       paridade com a v2.2 em 5 recortes: totais, cada máquina, grupos, cada dia
+ ✓ tests/dashboard.test.ts    filtro cruzado e período de comparação idênticos à v2.2; regras dos visuais
+ ✓ tests/views.test.ts        baixo desempenho, pedidos, OPs e análise mensal idênticos à v2.2
+ ✓ tests/losses.test.ts       manutenção (MTTR, MTBF, paradas a confirmar) e improdutivos idênticos à v2.2
+ ✓ tests/management.test.ts   carteira, carga semanal, simulador, operadores e qualidade idênticos à v2.2
+ ✓ tests/reports.test.ts      o Excel gerado fecha com o motor: capacidade, produção, dias e pareto
+ ✓ tests/planning.test.ts     capacidade do mês, HE realizada e programada, cópia de mês e escala idênticas à v2.2
  ✓ tests/engine-units.test.ts intervalos, datas e saneamento/migração da configuração
- ✓ tests/db.test.ts         integridade referencial, consultas SQL e carteira de demonstração
+ ✓ tests/db.test.ts           integridade referencial, consultas SQL e carteira de demonstração
  Tests  78 passed
 ```
 
 Além da paridade, há testes de invariantes de negócio: o destino da capacidade soma exatamente a capacidade;
 a cascata fecha; o pareto soma 100%; as horas distribuídas por hora do dia batem com os apontamentos.
 A integração contínua (`.github/workflows/ci.yml`) roda checagem de tipos, testes e build a cada push.
+
+O enquadramento também foi verificado de forma automatizada: cada tela foi aberta em 1440, 1280 e 390 px de
+largura, procurando texto cortado, rótulo de gráfico fora do desenho e rolagem horizontal da página. Os
+relatórios em PDF foram gerados e conferidos página a página.
 
 ## Como este projeto foi construído
 
