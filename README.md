@@ -4,7 +4,7 @@
 
 **Utilização, capacidade e perdas de um parque de usinagem, calculadas a partir dos apontamentos do ERP.**
 
-React · TypeScript · SQLite no navegador · 69 testes automatizados · dados 100% fictícios
+React · TypeScript · SQLite no navegador · 78 testes automatizados · dados 100% fictícios
 
 </div>
 
@@ -103,8 +103,9 @@ npm test
  ✓ tests/management.test.ts carteira, carga semanal, simulador, operadores e qualidade idênticos à v2.2
  ✓ tests/reports.test.ts    o Excel gerado fecha com o motor: capacidade, produção, dias e pareto
  ✓ tests/planning.test.ts   capacidade do mês, HE realizada e programada, cópia de mês e escala idênticas à v2.2
+ ✓ tests/engine-units.test.ts intervalos, datas e saneamento/migração da configuração
  ✓ tests/db.test.ts         integridade referencial, consultas SQL e carteira de demonstração
- Tests  69 passed
+ Tests  78 passed
 ```
 
 Além da paridade, há testes de invariantes de negócio: o destino da capacidade soma exatamente a capacidade;
@@ -135,7 +136,7 @@ Requer Node 22 ou mais recente.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 69 testes
+npm test           # 78 testes
 npm run build      # gera dist/ (site estático)
 ```
 
@@ -145,12 +146,13 @@ npm run build      # gera dist/ (site estático)
 db/              modelo de dados (schema.sql) e cadastros em CSV
 public/pulso.db  base de demonstração
 src/db/          abertura do banco e consultas SQL
-src/engine/      motor de indicadores (regras de negócio)
+src/engine/      motor de indicadores (regras de negócio), TypeScript estrito
+src/reports/     construtor da planilha Excel
 src/analytics/   cálculos das telas — funções puras e testadas
 src/app/         telas, componentes e gráficos em React
 tests/           testes automatizados e valores de referência da v2.2
 docs/            regras de negócio e decisões de arquitetura
-legacy/          PULSO v2.2, referência até o fim da migração
+legacy/          PULSO v2.2, a versão de referência dos testes de paridade
 ```
 
 ## Roteiro
@@ -162,7 +164,8 @@ legacy/          PULSO v2.2, referência até o fim da migração
 - [x] Carteira e prazos · Simulador de capacidade · Operadores · Qualidade dos dados
 - [x] Horas extras · Calendário fabril · Configurações
 - [x] Relatórios em PDF e Excel
-- [ ] Conversão do núcleo do motor (`src/engine/core.js`) para TypeScript estrito
+- [x] Núcleo do motor em TypeScript estrito, separado em calendário, intervalos, configuração e base
+- [ ] Publicação da demonstração no GitHub Pages
 
 ## Sobre os dados
 

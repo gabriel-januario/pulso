@@ -1,4 +1,4 @@
-import { createEngine as createCore } from './core.js';
+import { createEngine as createCore } from './core';
 import type { Engine, EngineConfig, RawDataset } from './types';
 
 export * from './types';
@@ -8,7 +8,7 @@ export * from './types';
  * Cada instância guarda sua própria base, configuração e caches — não há estado global.
  */
 export function createEngine(raw: RawDataset, config?: Partial<EngineConfig>, options?: { imported?: boolean }): Engine {
-  return createCore(raw, config, options) as Engine;
+  return createCore(raw, config, options);
 }
 
 /** Primeiro e último dia (AAAA-MM-DD) do mês mais recente com dados. */

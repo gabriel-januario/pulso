@@ -50,7 +50,7 @@ export function monthlyAnalysis(engine: Engine, months: string[], grp: string, a
     const f = `${ym}-01` < lo ? lo : `${ym}-01`, t = lastDayOfMonth(ym) > hi ? hi : lastDayOfMonth(ym);
     return engine.agg({ from: f, to: t, grp: 'all' });
   });
-  const rosterModes = (engine as unknown as { rosterModes(ym: string): { valid: number } }).rosterModes;
+  const rosterModes = engine.rosterModes;
   const data: MonthData[] = months.map((ym) => { const A = get(ym), ok = rosterModes(ym).valid > 0; return { ym, A, ok, t: totalsFor(A, grp) }; });
   const T = zero();
   for (const m of data) add(T, m.t);

@@ -98,9 +98,13 @@ export interface ProdRecord {
 }
 
 /** Um apontamento de parada. `mach` é a máquina (direta ou inferida pelo operador); `mp` são os minutos dentro do período. */
-export interface StopRecord extends ProdRecord {
+/** parada da base: máquina direta ou inferida pela máquina em que o operador produzia */
+export interface StopBase extends ProdRecord {
   mach: string | null;
   inf: boolean;
+}
+/** parada dentro de um período: categoria efetiva (com as decisões do usuário) e minutos no período */
+export interface StopRecord extends StopBase {
   cat: string;
   isMan: boolean;
   mp: number;
@@ -125,7 +129,7 @@ export interface MachineEvent { e: MaintenanceEvent; real: number; ap: number; o
  * Parada provável a confirmar: um improdutivo (não de manutenção) seguido de horas de turno sem produção,
  * enquanto o operador foi apontar em outra máquina.
  */
-export interface SuspectStop { rc: string; t0: number; end: number; s: StopRecord; idle: number; mv: ProdRecord; key: string; open: boolean }
+export interface SuspectStop { rc: string; t0: number; end: number; s: StopBase; idle: number; mv: ProdRecord; key: string; open: boolean }
 
 export type DayType = 'util' | 'folga' | 'fer' | 'manut' | 'extra';
 export interface DayConfig { t: DayType; sh: string[] }
@@ -186,6 +190,10 @@ export interface AggResult {
   days: string[];
   T: Totals;
   dayT: DayTotals[];
+  /** dias com capacidade fixa (workDays inclui dias só com HE) */
+  workDaysN: number;
+  /** eventos de manutenção que tocam o período */
+  evs: MachineEvent[];
   G: GroupAgg[];
   list: MachineAgg[];
   M: Record<string, MachineAgg>;
@@ -214,7 +222,7 @@ export interface EngineDataset {
   byOp: Record<string, ProdRecord[]>;
   byRc: Record<string, ProdRecord[]>;
   /** paradas ligadas à usinagem (diretas na máquina ou inferidas pelo operador) */
-  stops: StopRecord[];
+  stops: StopBase[];
   meta: RawDataset['meta'];
 }
 
@@ -258,6 +266,12 @@ export interface Engine {
   buildEvents(): { ev: (MaintenanceEvent & { realAll: number; p?: ManualStop })[]; sus: SuspectStop[] };
   /** capacidade (min) da máquina dentro do intervalo absoluto [a, b) */
   capSeg(rc: string, a: number, b: number): number;
+  /** descarta os caches de capacidade (o motor já chama ao trocar a configuração) */
+  clearCap(): void;
+  /** texto curto da escala da máquina no mês ("2 turnos", "T1+T3", "Eventual"…) */
+  turnosTxt(mc: MachineMonthConfig): string;
+  /** capacidade do dia em minutos: turnos + hora extra */
+  capMin(rc: string, iso: string, noCut?: boolean): number;
   /** capacidade do dia: n = turnos, he = hora extra, op = operacional (min) */
   capParts(rc: string, iso: string, noCut?: boolean): { n: number; he: number; op: number };
   /** tipo de dia e turnos previstos (calendário alterado, feriado ou padrão da semana) */

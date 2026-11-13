@@ -28,8 +28,13 @@ testes antes de migrar cada tela.
 
 **Por quê:** reescrever as regras do zero em TypeScript seria mais elegante, mas qualquer diferença de arredondamento
 ou de ordem de cálculo mudaria números que a gestão já conhece. Capturei os resultados da v2.2 com o navegador em modo
-automatizado (`tests/golden*.json`) e exijo igualdade em cada recorte. A conversão do núcleo para TypeScript estrito
-será feita função a função, com esses testes sempre verdes.
+automatizado (`tests/golden*.json`) e exijo igualdade em cada recorte.
+
+Com todas as telas migradas, o núcleo foi convertido para TypeScript estrito e separado por responsabilidade:
+`core/time.ts` (dia produtivo e calendário), `core/intervals.ts` (aritmética de intervalos), `core/config.ts`
+(padrões, saneamento e migração de versões antigas), `core/dataset.ts` (leitura da base) e `core.ts` (estado,
+capacidade, eventos e agregação). Nenhum `any` e nenhuma conversão forçada de tipo no motor. A troca foi feita
+com os mesmos testes de paridade verdes do início ao fim: se um número tivesse mudado, o teste teria acusado.
 
 ## D3 · Motor sem estado global
 
@@ -44,7 +49,7 @@ lado e tornava o comportamento dependente da ordem de execução. Há um teste e
 baixo desempenho) fica em `src/analytics`, em funções que recebem a agregação e devolvem dados.
 
 **Por quê:** os componentes React só desenham. Os números ficam testáveis sem navegador e reaproveitáveis nos
-relatórios em PDF e Excel, que serão a próxima etapa.
+relatórios em PDF e Excel.
 
 ## D5 · Gráficos em SVG próprio
 
@@ -113,4 +118,5 @@ em [`db/schema.sql`](../db/schema.sql).
 | `tests/management.test.ts` | carteira (situação e término de cada PV), carga das 8 semanas, simulador, operadores e qualidade iguais à v2.2 |
 | `tests/planning.test.ts` | capacidade de cada recurso e dia do mês, HE realizada e programada, sugestão de titular, cópia de mês iguais à v2.2 |
 | `tests/reports.test.ts` | a planilha Excel gerada fecha com o motor (capacidade, produção, dias, pareto) e usa fórmulas na utilização |
+| `tests/engine-units.test.ts` | peças puras do motor: intervalos, datas, saneamento e migração da configuração |
 | `tests/db.test.ts` | integridade referencial do banco, consultas SQL e carteira de demonstração |
