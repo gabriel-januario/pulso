@@ -6,13 +6,23 @@
 
 **[Abrir a demonstração →](https://gabriel-januario.github.io/pulso/)**
 
-React · TypeScript · SQLite no navegador · 78 testes automatizados · dados 100% fictícios
+React · TypeScript · SQLite no navegador · 78 testes automatizados · base de demonstração transformada
 
 </div>
 
 ![Visão geral do PULSO: utilização por dia, por grupo e destino da capacidade](docs/img/visao-geral.jpg)
 
 ---
+
+## Roteiro de demonstração
+
+**Decisão de PPCP:** identificar qual grupo de máquinas investigar antes da próxima reunião de carga.
+
+1. Na **Visão geral**, selecione outubro de 2026 e todos os grupos. Nesse cenário, a utilização é de **67,9%** para toda a usinagem e **51,0%** em planas e fresadoras.
+2. No **Painel BI**, filtre planas e fresadoras. Compare as máquinas e a evolução diária para localizar o recurso e o dia que mais merecem investigação.
+3. Cruze os motivos de parada com o calendário e a qualidade dos registros. Horas sem apontamento sinalizam uma lacuna de informação. Confirme com a operação se houve falta de cobertura, falta de carga ou falha de registro antes de atribuir uma causa.
+
+A decisão proposta para a reunião é escolher o recurso que será investigado, confirmar a causa com a produção e definir o responsável pela ação. Os números ilustram a base de demonstração.
 
 ## Por que eu construí o PULSO
 
@@ -80,6 +90,14 @@ As definições abaixo são o coração do projeto. O detalhamento, com exemplos
 | **Destino da capacidade** | Cada minuto de capacidade fixa recebe exatamente um destino: manutenção, sem cobertura, produção, improdutivo, sem programação ou sem apontamento. A soma fecha em 100% |
 | **Parada de manutenção** | Abre no apontamento de manutenção e só fecha no próximo apontamento produtivo da máquina (limite de 5 dias). O tempo real é a capacidade de turno dentro desse intervalo |
 | **Status** | No alvo ≥ 85% · atenção entre 65% e 85% · crítico < 65% (configurável) |
+
+### Como ler os dois números de produção
+
+Na visão geral de outubro de 2026, o cartão indica cerca de **4.788 h dentro da escala**. Esse valor mede a produção apontada dentro dos turnos regulares e compõe o cálculo de utilização. A faixa **Destino da capacidade fixa** atribui **3.916,9 h à produção** no mesmo recorte. Ela distribui as horas líquidas da capacidade por destino e aplica a prioridade de manutenção e falta de cobertura antes de atribuir horas à produção.
+
+A diferença de aproximadamente **871 h** resulta desses critérios. Consulte a [distribuição de capacidade no motor de cálculo](src/engine/core.ts) e as [definições dos indicadores](docs/REGRAS-DE-NEGOCIO.md) ao comparar os valores.
+
+A previsão da carteira projeta o saldo com base no ritmo recente de apontamentos. Para usar o resultado no planejamento, confirme se o previsto e o realizado usam a mesma unidade e verifique sobreposições de apontamentos por pedido e recurso.
 
 ## Arquitetura
 
@@ -150,7 +168,7 @@ decide *o que* precisa ser verdade; a IA acelera o *como*; e testes garantem que
 Requer Node 22 ou mais recente.
 
 ```bash
-npm install
+npm ci
 npm run dev        # http://localhost:5173
 npm test           # 78 testes
 npm run build      # gera dist/ (site estático)
@@ -185,11 +203,7 @@ legacy/          PULSO v2.2, a versão de referência dos testes de paridade
 
 ## Sobre os dados
 
-Todos os dados são fictícios. A base foi derivada de uma exportação real e transformada: nomes de operadores e
-logins inventados; chapas, OPs, pedidos e centros de custo renumerados; horários e durações alterados. Os
-modelos de máquina são nomes de fabricantes de mercado. A "Metalúrgica Horizonte S.A." não existe.
-A previsão da carteira (horas previstas e entrega de cada pedido, tabela `carteira_pv`) também é fictícia: foi
-gerada a partir das horas apontadas para que a tela mostre pedidos em todas as situações.
+A base de demonstração foi derivada de uma exportação real e passou por transformação. Os nomes de operadores e logins foram substituídos por valores inventados. Chapas, OPs, pedidos e centros de custo foram renumerados. Horários e durações foram alterados. A Metalúrgica Horizonte S.A. é uma empresa fictícia. As horas previstas e datas de entrega da carteira foram geradas para ilustrar situações de planejamento.
 
 ---
 
