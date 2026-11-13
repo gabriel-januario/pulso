@@ -1,0 +1,25 @@
+codigo;descricao;categoria
+5;Ginástica laboral;pess
+10;Preparação de máquina (setup);setup
+20;Troca de ferramenta;setup
+30;Aguardando ponte rolante;org
+40;Aguardando material;mat
+50;Aguardando programa CNC;prog
+60;Aguardando desenho / revisão;prog
+70;Aguardando inspeção;qual
+80;Limpeza e organização do posto;org
+90;Reunião / treinamento;pess
+100;Retrabalho;qual
+115;Falta de operador;pess
+121;Manutenção preventiva;man
+122;Manutenção hidráulica;man
+123;Manutenção elétrica;man
+124;Manutenção mecânica;man
+125;Aguardando peça de reposição;man
+126;Falha no CNC / comando;man
+127;Lubrificação;man
+137;Aguardando dispositivo de fixação;setup
+147;Falta de energia / utilidades;out
+155;Montagem e ajuste da peça;setup
+157;Medição em máquina;qual
+159;Aguardando ordem de produção;org
