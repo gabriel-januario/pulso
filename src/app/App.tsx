@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { monthOptions } from '../analytics/period';
 import { SECTIONS, Sidebar } from './components/Sidebar';
+import { useConfig } from './config';
 import { useFilters } from './filters';
 import { dmy, int } from './format';
 import { TooltipProvider } from './tooltip';
@@ -9,7 +10,10 @@ import { Dashboard } from './views/Dashboard';
 import { Groups } from './views/Groups';
 import { Machines } from './views/Machines';
 import { Monthly } from './views/Monthly';
+import { Maintenance } from './views/Maintenance';
 import { Overview } from './views/Overview';
+import type { ViewProps } from './views/types';
+import { Unproductive } from './views/Unproductive';
 import { Timeline } from './views/Timeline';
 
 export function App() {
@@ -19,13 +23,15 @@ export function App() {
   return <TooltipProvider><Shell pulso={state.pulso} /></TooltipProvider>;
 }
 
-const VIEWS: Record<string, { title: string; render: typeof Overview; ownFilters?: boolean }> = {
+const VIEWS: Record<string, { title: string; render: (p: ViewProps) => React.ReactNode; ownFilters?: boolean }> = {
   geral: { title: 'Visão geral', render: Overview },
   painel: { title: 'Painel BI', render: Dashboard },
   mensal: { title: 'Análise mensal', render: Monthly, ownFilters: true },
   maquinas: { title: 'Máquinas', render: Machines },
   grupos: { title: 'Grupos de máquinas', render: Groups },
   linha: { title: 'Linha do tempo', render: Timeline },
+  manutencao: { title: 'Manutenção', render: Maintenance },
+  improdutivas: { title: 'Improdutivas', render: Unproductive },
 };
 const routeOf = () => { const id = location.hash.replace(/^#\/?/, '').split('?')[0]; return VIEWS[id] ? id : 'geral'; };
 
@@ -35,6 +41,7 @@ function Shell({ pulso }: { pulso: Pulso }) {
   const all = useMemo(() => ({ from: engine.util.s2iso(engine.dataset.minPd), to: engine.util.s2iso(engine.dataset.maxPd) }), [engine]);
   const [view, setView] = useState(routeOf);
   const filters = useFilters(months, all, view);
+  const config = useConfig(engine);
   useEffect(() => {
     const on = () => setView(routeOf());
     addEventListener('hashchange', on);
@@ -69,7 +76,7 @@ function Shell({ pulso }: { pulso: Pulso }) {
           </div>}
         </header>
         <div className="view">
-          <V.render key={view} pulso={pulso} filters={filters} />
+          <V.render key={view} pulso={pulso} filters={filters} config={config} />
         </div>
       </main>
     </div>

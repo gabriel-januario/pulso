@@ -62,6 +62,16 @@ JavaScript da aplicação inteira fica em ≈ 125 kB compactado, sem biblioteca 
 **Por quê:** em gestão, o recorte é o que se discute. Com a URL, um supervisor envia exatamente o que está vendo.
 O roteamento por `#` funciona em qualquer hospedagem estática, sem configuração de servidor.
 
+## D7 · Decisões do usuário separadas dos dados
+
+**Decisão:** o que a supervisão registra pelas telas (paradas no quadro, confirmação ou descarte de paradas
+prováveis) é configuração, não apontamento. Fica num objeto de configuração salvo no navegador
+(`src/app/config.ts`) e é aplicado ao motor com `engine.setConfig`.
+
+**Por quê:** o banco continua sendo o retrato fiel do que veio do ERP; as decisões humanas ficam rastreáveis e
+reversíveis, e o motor recalcula tudo a partir das duas fontes. Quando houver servidor, essa configuração é a
+primeira candidata a ir para uma tabela própria.
+
 ## Modelo de dados
 
 ```
@@ -82,4 +92,5 @@ em [`db/schema.sql`](../db/schema.sql).
 | `tests/engine.test.ts` | paridade do motor com a v2.2 em 5 recortes (totais, cada máquina, grupos, cada dia) e invariantes |
 | `tests/dashboard.test.ts` | filtro cruzado e período de comparação iguais à v2.2; regras dos visuais do Painel BI |
 | `tests/views.test.ts` | baixo desempenho, pedidos, OPs e análise mensal iguais à v2.2 |
+| `tests/losses.test.ts` | manutenção e improdutivos iguais à v2.2 em dois períodos; efeito do quadro de paradas e da confirmação |
 | `tests/db.test.ts` | integridade referencial do banco e consultas SQL |

@@ -327,3 +327,28 @@ p.meta { margin: 0 0 8px; }
 .lowt th.n { white-space: normal; }
 .lowt .mots { width: 200px; min-width: 0; max-width: 200px; }
 .lowt .mots span { min-width: 0; max-width: 100%; overflow: hidden; }
+
+/* ---------- manutenção e improdutivas ---------- */
+.kpi .kv.txt { font-family: var(--sans); font-size: 15px; font-weight: 700; line-height: 1.25; white-space: normal; }
+.btn.pri { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn.pri:hover:not(:disabled) { background: #1a5fb4; }
+.btn.ok { color: var(--good); border-color: #b7dfc5; background: var(--good-bg); }
+.btn.no { color: var(--crit); border-color: #f1c4c0; background: #fff; }
+.form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 12px; align-items: end; }
+.form label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; font-weight: 600; color: var(--ink-2); min-width: 0; }
+.form .ctl { width: 100%; }
+.form label:nth-child(5) { grid-column: span 2; }
+@media (min-width: 1500px) { .form { grid-template-columns: minmax(180px, 1.6fr) minmax(190px, 1.2fr) minmax(190px, 1.2fr) minmax(120px, .9fr) minmax(150px, 1.6fr) auto; } .form label:nth-child(5) { grid-column: auto; } }
+.msg { margin: 10px 0 0; font-size: 12.5px; color: var(--good); font-weight: 600; }
+.alive { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin-top: 14px; }
+.alive > .empty { grid-column: 1 / -1; }
+.dcard { border: 1px solid #ddd6fb; background: #f7f5ff; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.dcard.det { border-color: #f6cdb8; background: #fff7f2; }
+.dcard .r1 { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dcard .meta { line-height: 1.35; }
+.dcard .dur { font-family: var(--num); font-size: 22px; font-weight: 600; color: #4c3fb0; }
+.dcard .dur.imp { color: #c2410c; }
+.dcard .dur small { font-family: var(--sans); font-size: 12px; color: var(--ink-3); font-weight: 500; }
+.tag.imp { background: #fdeee6; color: #9a3a12; border-color: #f6cdb8; }
+@media (max-width: 860px) { .form { grid-template-columns: minmax(0, 1fr); } .form label:nth-child(5) { grid-column: auto; } }
+.t td.n.code:first-child { min-width: 0; width: 34px; }

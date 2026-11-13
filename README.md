@@ -4,7 +4,7 @@
 
 **Utilização, capacidade e perdas de um parque de usinagem, calculadas a partir dos apontamentos do ERP.**
 
-React · TypeScript · SQLite no navegador · 44 testes automatizados · dados 100% fictícios
+React · TypeScript · SQLite no navegador · 52 testes automatizados · dados 100% fictícios
 
 </div>
 
@@ -41,6 +41,8 @@ hora de capacidade; quais motivos concentram as perdas; e quais máquinas puxam 
 | **Máquinas** | O que aconteceu nesta máquina, dia a dia, OP a OP? |
 | **Grupos de máquinas** | A média do grupo esconde máquinas com problema? |
 | **Linha do tempo** | Quem estava produzindo o quê, a cada hora? Quais pedidos consumiram mais máquina? |
+| **Manutenção** | Qual é a disponibilidade real? Quanto da parada não foi apontado? Quais máquinas estão paradas agora? |
+| **Improdutivas** | Quais motivos concentram as perdas? Quais máquinas e operadores são mais afetados? |
 
 Os filtros ficam na URL (`#/painel?p=2026-10&g=Mandrilhadoras&m=MHMC`): um recorte pode ser enviado por link.
 
@@ -89,8 +91,9 @@ npm test
  ✓ tests/engine.test.ts     paridade com a v2.2 em 5 recortes: totais, cada máquina, grupos, cada dia
  ✓ tests/dashboard.test.ts  filtro cruzado e período de comparação idênticos à v2.2; regras dos visuais
  ✓ tests/views.test.ts      baixo desempenho, pedidos, OPs e análise mensal idênticos à v2.2
+ ✓ tests/losses.test.ts     manutenção (MTTR, MTBF, paradas a confirmar) e improdutivos idênticos à v2.2
  ✓ tests/db.test.ts         integridade referencial e consultas SQL
- Tests  44 passed
+ Tests  52 passed
 ```
 
 Além da paridade, há testes de invariantes de negócio: o destino da capacidade soma exatamente a capacidade;
@@ -121,7 +124,7 @@ Requer Node 22 ou mais recente.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 44 testes
+npm test           # 52 testes
 npm run build      # gera dist/ (site estático)
 ```
 
@@ -144,7 +147,7 @@ legacy/          PULSO v2.2, referência até o fim da migração
 - [x] Banco de dados e camada de consultas
 - [x] Motor de indicadores isolado e testado contra a v2.2
 - [x] Visão geral · Painel BI · Análise mensal · Máquinas · Grupos · Linha do tempo
-- [ ] Manutenção e Improdutivas
+- [x] Manutenção (com quadro de máquinas paradas) e Improdutivas
 - [ ] Carteira e prazos · Simulador de capacidade · Operadores · Qualidade dos dados
 - [ ] Horas extras · Calendário fabril · Configurações
 - [ ] Relatórios em PDF e Excel

@@ -1,3 +1,4 @@
+import type { ViewProps } from './types';
 import { useMemo } from 'react';
 import { restrictToMachines } from '../../analytics/crossfilter';
 import { capacityWaterfall, hourByWeekday, monthlySeries, overtimeByGroup, stopPareto, topOperators, utilizationVsLosses } from '../../analytics/dashboard';
@@ -13,10 +14,8 @@ import { Scatter } from '../charts/Scatter';
 import { TrendChart, type TrendPoint } from '../charts/TrendChart';
 import { UtilBars } from '../charts/UtilBars';
 import { Waterfall as WaterfallChart } from '../charts/Waterfall';
-import type { Filters } from '../filters';
 import { dm, dmy, hours, hours1, int, WEEKDAY } from '../format';
 import { groupColor, GROUP_ORDER } from '../theme';
-import type { Pulso } from '../usePulso';
 
 function Panel({ title, span, action, children, className }: { title: string; span: number; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
@@ -28,7 +27,7 @@ function Panel({ title, span, action, children, className }: { title: string; sp
 }
 
 /** Painel BI: visão analítica com filtros cruzados (grupo, máquina e dia). */
-export function Dashboard({ pulso, filters }: { pulso: Pulso; filters: Filters }) {
+export function Dashboard({ pulso, filters }: ViewProps) {
   const { engine } = pulso;
   const { range, grp, machines, drillDay } = filters.state;
   const first = engine.util.s2iso(engine.dataset.minPd), last = engine.util.s2iso(engine.dataset.maxPd);

@@ -1,18 +1,17 @@
+import type { ViewProps } from './types';
 import { useMemo, useState } from 'react';
 import { HBars } from '../charts/HBars';
 import { TrendChart } from '../charts/TrendChart';
 import { KpiRow } from '../components/KpiRow';
 import { LowPerformers } from '../components/LowPerformers';
-import type { Filters } from '../filters';
 import { dmy, hours, hours1, int, pct, WEEKDAY } from '../format';
 import { groupColor, SERIES, STATUS_BAR, STATUS_INK } from '../theme';
-import type { Pulso } from '../usePulso';
 
 const DEST = [['used', 'Produção', SERIES.produced], ['accountStop', 'Improdutivo', SERIES.stop], ['accountMaint', 'Manutenção', SERIES.maint],
   ['uncovered', 'Sem cobertura', '#b45309'], ['noLoad', 'Sem programação', '#475569'], ['gap', 'Sem apontamento', '#b9c6d6']] as const;
 
 /** Grupos de máquinas: compara famílias, abre uma delas e mostra quem puxa o resultado para baixo. */
-export function Groups({ pulso, filters }: { pulso: Pulso; filters: Filters }) {
+export function Groups({ pulso, filters }: ViewProps) {
   const { engine } = pulso;
   const { range } = filters.state;
   const A = useMemo(() => engine.agg({ ...range, grp: 'all' }), [engine, range]);

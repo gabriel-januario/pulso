@@ -1,3 +1,4 @@
+import type { ViewProps } from './types';
 import { useMemo } from 'react';
 import { paradasPorMotivo } from '../../db/queries';
 import { CapacityBar } from '../components/CapacityBar';
@@ -6,12 +7,10 @@ import { GroupBars } from '../components/GroupBars';
 import { KpiCard } from '../components/KpiCard';
 import { MachineTable } from '../components/MachineTable';
 import { StopsPareto } from '../components/StopsPareto';
-import type { Filters } from '../filters';
 import { hours, int, pct, pct1 } from '../format';
-import type { Pulso } from '../usePulso';
 
 /** Visão geral: os números do período em uma página. */
-export function Overview({ pulso, filters }: { pulso: Pulso; filters: Filters }) {
+export function Overview({ pulso, filters }: ViewProps) {
   const { engine, db } = pulso;
   const { range, grp } = filters.state;
   const all = useMemo(() => engine.agg({ ...range, grp: 'all' }), [engine, range]);

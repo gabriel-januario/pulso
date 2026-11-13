@@ -71,6 +71,16 @@ máquina pareceria ter parado 30 minutos quando ficou parada dois dias. A regra:
 
 Paradas que se sobrepõem na mesma máquina são unidas em um único evento.
 
+**Indicadores:** disponibilidade = 1 − manutenção ÷ capacidade fixa; **MTTR** = parada real ÷ nº de eventos;
+**MTBF** = horas produzidas ÷ nº de eventos.
+
+**Quadro de máquinas paradas.** A supervisão registra uma parada com início e, quando houver, a liberação. Uma
+parada aberta no quadro vira evento de manutenção até ser liberada, mesmo sem nenhum apontamento.
+
+**Paradas a confirmar.** Um improdutivo que *não* é de manutenção, seguido de pelo menos 4 horas de turno sem
+produção na máquina enquanto o operador foi apontar em outra, é uma provável quebra não declarada. O PULSO lista
+essas ocorrências; a supervisão confirma como manutenção (passa a contar como parada) ou descarta.
+
 ## 7. Destino da capacidade
 
 Cada minuto de capacidade fixa recebe **um único** destino, nesta ordem de prioridade:

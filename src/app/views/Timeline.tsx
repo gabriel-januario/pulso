@@ -1,15 +1,14 @@
+import type { ViewProps } from './types';
 import { useMemo, useState } from 'react';
 import { addDays } from '../../analytics/period';
 import { resourceTimeline, salesOrders } from '../../analytics/resources';
 import { Gantt } from '../charts/Gantt';
 import { OrdersTable } from '../components/OrdersTable';
 import { downloadCsv } from '../csv';
-import type { Filters } from '../filters';
 import { dm, dmy, hours1, int, pct } from '../format';
-import type { Pulso } from '../usePulso';
 
 /** Linha do tempo da fábrica (1, 3 ou 7 dias), OPs por recurso e ranking de pedidos. */
-export function Timeline({ pulso, filters }: { pulso: Pulso; filters: Filters }) {
+export function Timeline({ pulso, filters }: ViewProps) {
   const { engine } = pulso;
   const { range, grp } = filters.state;
   const lo = engine.util.s2iso(engine.dataset.minPd), hi = engine.util.s2iso(engine.dataset.maxPd);

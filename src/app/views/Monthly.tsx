@@ -1,3 +1,4 @@
+import type { ViewProps } from './types';
 import { useMemo, useState } from 'react';
 import { availableMonths, monthlyAnalysis } from '../../analytics/monthly';
 import { monthLong, monthShort } from '../../analytics/period';
@@ -7,16 +8,14 @@ import { TrendChart, type TrendPoint } from '../charts/TrendChart';
 import { CapacityBar } from '../components/CapacityBar';
 import { KpiCard } from '../components/KpiCard';
 import { downloadCsv } from '../csv';
-import type { Filters } from '../filters';
 import { dmy, hours, hours1, int, pct1, WEEKDAY } from '../format';
 import { SERIES } from '../theme';
-import type { Pulso } from '../usePulso';
 
 const TABS = { resumo: 'Resumo executivo', perdas: 'Perdas', grupos: 'Recursos e grupos' } as const;
 type Tab = keyof typeof TABS;
 
 /** Análise mensal: compara meses (ou trimestres, ou o ano) para toda a usinagem ou um grupo. */
-export function Monthly({ pulso }: { pulso: Pulso; filters: Filters }) {
+export function Monthly({ pulso }: ViewProps) {
   const { engine } = pulso;
   const all = useMemo(() => availableMonths(engine), [engine]);
   const [from, setFrom] = useState(all[Math.max(0, all.length - 3)]);

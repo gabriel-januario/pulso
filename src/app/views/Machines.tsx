@@ -1,3 +1,4 @@
+import type { ViewProps } from './types';
 import { useMemo } from 'react';
 import { machineDays, stopsByReason } from '../../analytics/resources';
 import { Gantt } from '../charts/Gantt';
@@ -7,12 +8,10 @@ import { CapacityBar } from '../components/CapacityBar';
 import { EventsTable } from '../components/EventsTable';
 import { KpiRow } from '../components/KpiRow';
 import { OrdersTable } from '../components/OrdersTable';
-import type { Filters } from '../filters';
 import { dm, dmy, hours, hours1, WEEKDAY } from '../format';
-import type { Pulso } from '../usePulso';
 
 /** Máquina a máquina: indicadores, evolução, linha do tempo dia a dia, OPs e paradas. */
-export function Machines({ pulso, filters }: { pulso: Pulso; filters: Filters }) {
+export function Machines({ pulso, filters }: ViewProps) {
   const { engine } = pulso;
   const { range, grp, machine } = filters.state;
   const A = useMemo(() => engine.agg({ ...range, grp }), [engine, range, grp]);
