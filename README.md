@@ -46,7 +46,8 @@ mantendo os números idênticos:
 - [x] Banco de dados SQLite e camada de consultas
 - [x] Motor de indicadores isolado, com testes contra a v2.2
 - [x] Visão geral
-- [ ] Painel BI, Análise mensal, Máquinas, Grupos, Linha do tempo
+- [x] Painel BI (filtros cruzados por grupo, máquina e dia; comparação com o período anterior)
+- [ ] Análise mensal, Máquinas, Grupos, Linha do tempo
 - [ ] Manutenção e Improdutivas
 - [ ] Carteira, Simulador, Operadores, Qualidade dos dados
 - [ ] Horas extras, Calendário fabril, Configurações
@@ -68,9 +69,13 @@ Requer Node 22 ou mais recente.
 
 ## Testes
 
-`tests/engine.test.ts` compara o motor com valores de referência capturados da v2.2 (`tests/golden.json`) em cinco
-recortes de período e grupo: totais, cada máquina, grupos e evolução diária. `tests/db.test.ts` valida a
-integridade do banco e as consultas SQL.
+- `tests/engine.test.ts` compara o motor com valores de referência capturados da v2.2 (`tests/golden.json`) em cinco
+  recortes de período e grupo: totais, cada máquina, grupos e evolução diária.
+- `tests/dashboard.test.ts` confere o filtro cruzado e o período de comparação contra a v2.2 e as regras dos
+  visuais do Painel BI (a cascata fecha, o pareto soma 100%, as horas por hora do dia batem com os apontamentos).
+- `tests/db.test.ts` valida a integridade do banco e as consultas SQL.
+
+Os filtros ficam na URL (`#/painel?p=2026-10&g=Mandrilhadoras&m=MHMC`), então um recorte pode ser compartilhado por link.
 
 ## Estrutura
 
@@ -79,6 +84,7 @@ db/        modelo de dados (schema.sql) e tabelas de cadastro em CSV
 public/    pulso.db — a base de demonstração
 src/db/    abertura do banco e consultas SQL
 src/engine motor de indicadores
+src/analytics cálculos das telas (filtro cruzado, pareto, cascata, séries) — funções puras e testadas
 src/app/   telas e componentes React
 tests/     testes automáticos
 legacy/    PULSO v2.2 (referência até o fim da migração)

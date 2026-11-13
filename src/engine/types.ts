@@ -72,6 +72,31 @@ export interface DayTotals extends Measures {
   capP: number;
 }
 
+/** Um apontamento de produção em uma máquina de usinagem. Tempos em minutos absolutos. */
+export interface ProdRecord {
+  t0: number;
+  min: number;
+  /** dia produtivo (serial) e data AAAA-MM-DD */
+  pd: number;
+  date: string;
+  /** nome do operador */
+  op: string;
+  rc: string;
+  opn: number;
+  ped: number;
+  oper: number;
+  manual: boolean;
+}
+
+/** Um apontamento de parada. `mach` é a máquina (direta ou inferida pelo operador); `mp` são os minutos dentro do período. */
+export interface StopRecord extends ProdRecord {
+  mach: string | null;
+  inf: boolean;
+  cat: string;
+  isMan: boolean;
+  mp: number;
+}
+
 export interface MachineAgg extends Measures {
   m: Machine;
   grp: string;
@@ -82,6 +107,11 @@ export interface MachineAgg extends Measures {
   ords: Set<number>;
   ops: Set<string>;
   byDay: Record<string, Measures & { capP: number }>;
+  /** apontamentos de produção no período */
+  recs: ProdRecord[];
+  stops: StopRecord[];
+  /** manutenção oculta (tempo parado real além do apontado) */
+  ocult: number;
 }
 
 export interface GroupAgg extends Measures {
@@ -101,6 +131,11 @@ export interface AggResult {
   list: MachineAgg[];
   M: Record<string, MachineAgg>;
   workDays: number;
+  stops: StopRecord[];
+  /** início e fim do período em minutos absolutos, e o corte da base */
+  F: number;
+  T_: number;
+  cut: number;
   /** verdadeiro quando o período passa do último apontamento da base */
   cutIn: boolean;
 }
@@ -114,6 +149,7 @@ export interface EngineDataset {
   minPd: number;
   maxPd: number;
   nAll: number;
+  lastT: number;
   meta: RawDataset['meta'];
 }
 
